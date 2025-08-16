@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Área do Paciente — Integrada Neuropsicologia</title>
+  <meta name="description" content="Portal do paciente para acessar e preencher testes liberados."/>
+  <style>
+    :root{
+      --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
+      --pri:#4f46e5; --ok:#22c55e; --warn:#f59e0b; --line:#1f2937; --err:#ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+    .wrap{max-width:960px;margin:24px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px}
+    .brand{font-weight:700;overflow-wrap:anywhere}
+    h1,h2{margin:0 0 12px}
+    h2{font-size:1.05rem;color:var(--muted)}
+    label{display:block;font-weight:600;margin:10px 0 6px}
+    input,button{font:inherit}
+    input[type="text"], input[type="password"], input[type="date"]{
+      width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)
+    }
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:720px){.row{grid-template-columns:1fr}}
+    .btn{display:inline-flex;align-items:center;gap:8px;background:var(--pri);border:none;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .btn.sec{background:#334155}
+    .btn.ok{background:var(--ok)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .toolbar .btn{flex:0 0 auto}
+    @media (max-width:560px){
+      .toolbar{flex-direction:column;align-items:stretch}
+      .toolbar .btn{width:100%;justify-content:center}
+    }
+    .msg{margin:10px 0;padding:10px;border-radius:8px}
+    .msg.ok{background:#052e1a;color:#b3f7c1;border:1px solid #114d2a}
+    .msg.err{background:#3b0d0d;color:#ffd0d0;border:1px solid #5b1919}
+    .msg.warn{background:#3a2903;color:#ffe6b0;border:1px solid #5c4307}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:10px}
+    @media (max-width:560px){ .grid{grid-template-columns:1fr} }
+    .test{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+    .test-head{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;min-width:0}
+    @media (max-width:560px){ .test-head{grid-template-columns:1fr} }
+    .test-title{font-weight:700;overflow-wrap:anywhere;word-break:break-word;min-width:0}
+    .test-code{color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
+    .tag{justify-self:start;font-size:.75rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+    .tag.ja{background:#09331b;color:#9af0b1;border-color:#124d29}
+    .tag.preenchido{background:#07263a;color:#b9e7ff;border-color:#0a3c66}
+    .hidden{display:none !important}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">Integrada Neuropsicologia — Área do Paciente</div>
+      <div>
+        <button id="btnSair" class="btn sec hidden">Sair</button>
+      </div>
+    </div>
+
+    <!-- LOGIN -->
+    <section id="viewLogin" class="card">
+      <h1>Entrar</h1>
+      <p class="muted">Digite seu <strong>CPF</strong> e sua <strong>data de nascimento</strong>.</p>
+      <div class="row">
+        <div>
+          <label>CPF (somente números)</label>
+          <input id="cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" />
+        </div>
+        <div>
+          <label>Data de nascimento</label>
+          <input id="nasc" type="date" />
+        </div>
+      </div>
+      <div class="toolbar">
+        <button id="btnEntrar" class="btn">Entrar</button>
+      </div>
+      <div id="loginMsg" class="msg hidden"></div>
+    </section>
+
+    <!-- APP -->
+    <section id="viewApp" class="card hidden">
+      <h1>Olá, <span id="pacNomeSpan">Paciente</span></h1>
+      <div class="toolbar">
+        <button id="btnAtualizar" class="btn sec">Atualizar</button>
+        <span id="resume" class="tag">—</span>
+      </div>
+
+      <h2>Seus testes liberados</h2>
+      <div id="testsGrid" class="grid" aria-live="polite"></div>
+    </section>
+  </div>
+
+<script>
+/** ===========================
+ *  CONFIG
+ *  =========================== */
+const SHEETDB_BASE = "https://sheetdb.io/api/v1/8pmdh33s9fvy8"; // SheetDB da sua planilha
+const SHEETS = { TESTS:"Tests", PATIENTS:"Patients" };
+
+// ⚙️ Fallbacks globais (usados quando não houver URL na planilha nem no mapa JS)
+const BASE_TEST_URL = "https://seu-dominio.com/testes"; // Preencher -> BASE_TEST_URL/<code>
+const BASE_FORM_URL = "https://seu-dominio.com/form";   // Enviar link -> BASE_FORM_URL/<code>
+
+// ✅ Mapas opcionais no JS (sobrescrevem o BASE_* se preenchidos)
+// Ex.: TEST_URLS["IHS"] = "https://meu-form.com/ihs";
+const TEST_URLS = {
+  "BAI": "www.google.com",
+  // "BAI": "https://outro.com/bai"
+};
+const SHARE_URLS = {
+  // "IHS": "https://seu-site.com/ihs_share"
+};
+
+// incluir cpf/nasc como query nos links (pode desligar)
+const APPEND_ID_PARAMS = true;
+const INCLUDE_NASC_PARAM = true;
+
+const TEST_PREFIX = "";         // se usar prefixo nas colunas de teste na Patients
+const DONE_SUFFIX = "_FEITO";   // coluna opcional <CODE>_FEITO = sim
+const DEFAULT_TARGETS = ["pais","professores","segunda_fonte","heterorrelato"];
+
+/** ===========================
+ *  HELPERS
+ *  =========================== */
+const $ = s => document.querySelector(s);
+const el = (tag, opts={}) => Object.assign(document.createElement(tag), opts);
+const onlyDigits = s => (s||"").replace(/\D+/g,"");
+const toISO = s => s || "";
+
+function validaCPF(cpf){
+  cpf = onlyDigits(cpf);
+  if(!cpf || cpf.length!==11 || /^(\d)\1+$/.test(cpf)) return false;
+  let soma=0, resto;
+  for(let i=1;i<=9;i++) soma += parseInt(cpf.substring(i-1,i))*(11-i);
+  resto = (soma*10)%11; if(resto===10||resto===11) resto=0;
+  if(resto !== parseInt(cpf.substring(9,10))) return false;
+  soma=0;
+  for(let i=1;i<=10;i++) soma += parseInt(cpf.substring(i-1,i))*(12-i);
+  resto = (soma*10)%11; if(resto===10||resto===11) resto=0;
+  return resto === parseInt(cpf.substring(10,11));
+}
+function setMsg(box, text, type="ok"){
+  box.textContent = text;
+  box.className = "msg "+type;
+  text ? box.classList.remove("hidden") : box.classList.add("hidden");
+}
+function buildUrl(base, params){
+  try{
+    const u = new URL(base, window.location.href);
+    Object.entries(params||{}).forEach(([k,v])=> u.searchParams.set(k, v));
+    return u.toString();
+  }catch(_){
+    // base pode ser relativo; faz manual
+    const q = Object.entries(params||{}).map(([k,v])=>`${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&");
+    return base + (base.includes("?") ? "&" : "?") + q;
+  }
+}
+
+/** ===========================
+ *  SHEETDB
+ *  =========================== */
+async function sheetSearch(sheet, params){
+  const usp = new URLSearchParams(params);
+  const url = `${SHEETDB_BASE}/search?sheet=${encodeURIComponent(sheet)}&${usp.toString()}`;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error("Falha ao buscar em "+sheet);
+  return r.json();
+}
+
+/** ===========================
+ *  ESTADO
+ *  =========================== */
+let patient = null;        // linha de Patients
+let testsCatalog = [];     // [{code,label,order,shareable,targets[],form_url,share_url}...]
+
+/** ===========================
+ *  LOGIN
+ *  =========================== */
+$("#btnEntrar").addEventListener("click", login);
+$("#btnSair").addEventListener("click", ()=>{
+  patient=null; testsCatalog=[];
+  $("#cpf").value=""; $("#nasc").value="";
+  $("#testsGrid").innerHTML="";
+  $("#resume").textContent="—";
+  $("#pacNomeSpan").textContent="Paciente";
+  $("#viewApp").classList.add("hidden");
+  $("#btnSair").classList.add("hidden");
+  $("#viewLogin").classList.remove("hidden");
+});
+$("#cpf").addEventListener("input", (e)=>{
+  // máscara leve
+  const d = onlyDigits(e.target.value).slice(0,11);
+  const p = [d.slice(0,3), d.slice(3,6), d.slice(6,9), d.slice(9,11)].filter(Boolean);
+  e.target.value = p.length<=1? (p[0]||"") : p.length===2? `${p[0]}.${p[1]}` : p.length===3? `${p[0]}.${p[1]}.${p[2]}` : `${p[0]}.${p[1]}.${p[2]}-${p[3]}`;
+});
+
+async function login(){
+  const cpf = onlyDigits($("#cpf").value);
+  const nasc = toISO($("#nasc").value);
+  const msg = $("#loginMsg");
+  if(!validaCPF(cpf)) return setMsg(msg, "CPF inválido.", "err");
+  if(!nasc) return setMsg(msg, "Informe a data de nascimento.", "warn");
+  setMsg(msg, "Verificando…", "ok");
+  try{
+    const found = await sheetSearch(SHEETS.PATIENTS, { cpf, data_nascimento: nasc });
+    if(!found || !found.length) return setMsg(msg, "Dados não encontrados. Confira CPF e data.", "err");
+    patient = found[0];
+    setMsg(msg, "");
+    $("#pacNomeSpan").textContent = patient.nome || "Paciente";
+    $("#viewLogin").classList.add("hidden");
+    $("#viewApp").classList.remove("hidden");
+    $("#btnSair").classList.remove("hidden");
+    await loadTests();
+    renderTests();
+  }catch(e){
+    setMsg(msg, "Erro ao acessar. Tente novamente.", "err");
+    console.error(e);
+  }
+}
+
+/** ===========================
+ *  TESTES
+ *  =========================== */
+$("#btnAtualizar").addEventListener("click", async ()=>{
+  if(!patient) return;
+  const found = await sheetSearch(SHEETS.PATIENTS, { cpf: patient.cpf, data_nascimento: patient.data_nascimento });
+  if(found && found.length) patient = found[0];
+  await loadTests(true);
+  renderTests();
+});
+
+async function loadTests(skipFetch){
+  if(!skipFetch){
+    const rows = await sheetSearch(SHEETS.TESTS, {active:"sim"});
+    testsCatalog = rows.map(r=>{
+      const code = (r.code||"").trim();
+      const label = (r.label||code).trim();
+      const order = Number(r.order||9999);
+      const shareable = String(r.shareable||"não").trim().toLowerCase()==="sim";
+      // alvos
+      let targets = String(r.targets||"").trim();
+      const targetsArr = (targets ? targets.split(/[;,]+/).map(s=>s.trim().toLowerCase()).filter(Boolean) : []);
+      // urls (podem vir da planilha)
+      const form_url = (r.form_url||"").trim();
+      const share_url = (r.share_url||"").trim();
+      return {
+        code, label, order, shareable,
+        targets: (shareable?(targetsArr.length?targetsArr:DEFAULT_TARGETS):[]),
+        form_url, share_url
+      };
+    }).filter(t=>t.code).sort((a,b)=> a.order-b.order || a.label.localeCompare(b.label));
+  }
+  // resumo rápido
+  const allowed = testsCatalog.filter(t => testAllowed(t));
+  const cJa  = allowed.filter(t => testStatus(t)==="ja").length;
+  const cOk  = allowed.filter(t => testStatus(t)==="preenchido").length;
+  $("#resume").textContent = `Liberados: ${allowed.length} • Em aberto: ${cJa} • Preenchidos: ${cOk}`;
+}
+
+function colFor(t){ return (TEST_PREFIX ? TEST_PREFIX + t.code : t.code); }
+function doneColFor(t){ return colFor(t) + DONE_SUFFIX; }
+
+function testAllowed(t){
+  if(!patient) return false;
+  return String(patient[colFor(t)]||"").toLowerCase()==="sim";
+}
+function testStatus(t){
+  if(!testAllowed(t)) return "oculto";
+  const done = String(patient[doneColFor(t)]||"").toLowerCase()==="sim";
+  return done ? "preenchido" : "ja";
+}
+
+// resolve a URL final (planilha -> mapa JS -> base)
+function resolveFillUrl(t, cpf, nasc){
+  const base = t.form_url || TEST_URLS[t.code] || `${BASE_TEST_URL}/${encodeURIComponent(t.code)}`;
+  if(!APPEND_ID_PARAMS) return base;
+  const params = { cpf };
+  if(INCLUDE_NASC_PARAM) params.nasc = nasc;
+  return buildUrl(base, params);
+}
+function resolveShareUrl(t, cpf, target){
+  const base = t.share_url || SHARE_URLS[t.code] || `${BASE_FORM_URL}/${encodeURIComponent(t.code)}`;
+  const params = { cpf, source: target };
+  return buildUrl(base, params);
+}
+
+function renderTests(){
+  const grid = $("#testsGrid");
+  grid.innerHTML = "";
+  if(!patient){ grid.innerHTML = "<p class='muted'>Nenhum dado carregado.</p>"; return; }
+
+  const list = testsCatalog.filter(t => testAllowed(t));
+  if(!list.length){ grid.innerHTML = "<p class='muted'>Você ainda não possui testes liberados.</p>"; return; }
+
+  const cpf = onlyDigits(patient.cpf||"");
+  const nasc = patient.data_nascimento;
+
+  for(const t of list){
+    const st = testStatus(t);
+
+    const card = el("div", {className:"test"});
+
+    const head = el("div", {className:"test-head"});
+    const titleWrap = el("div", {style:"min-width:0"});
+    const title = el("div", {className:"test-title", textContent:t.label});
+    const code  = el("div", {className:"test-code", textContent:t.code});
+    titleWrap.appendChild(title); titleWrap.appendChild(code);
+
+    const tag = el("span", {className:"tag "+(st==="preenchido"?"preenchido":"ja"), textContent:(st==="preenchido"?"preenchido":"Pendente!")});
+
+    head.appendChild(titleWrap);
+    head.appendChild(tag);
+    card.appendChild(head);
+
+    const actions = el("div", {className:"toolbar"});
+
+    if(st==="preenchido"){
+      const btnDone = el("button", {className:"btn sec", textContent:"Preenchido", disabled:true});
+      actions.appendChild(btnDone);
+    }else{
+      const fillUrl = resolveFillUrl(t, cpf, nasc);
+      const btnPre = el("button", {className:"btn ok", textContent:"Preencher"});
+      btnPre.addEventListener("click", ()=> window.open(fillUrl, "_blank"));
+      actions.appendChild(btnPre);
+    }
+
+    if(t.shareable){
+      const btnShare = el("button", {className:"btn sec", textContent:"Enviar link"});
+      btnShare.addEventListener("click", async ()=>{
+        const tgt = await chooseTarget(t.targets);
+        if(!tgt) return;
+        const shareUrl = resolveShareUrl(t, cpf, tgt);
+        const ok = await navigator.clipboard.writeText(shareUrl).then(()=>true).catch(()=>false);
+        alert(ok ? "Link copiado! Cole no WhatsApp." : shareUrl);
+      });
+      actions.appendChild(btnShare);
+    }
+
+    card.appendChild(actions);
+    grid.appendChild(card);
+  }
+}
+
+// diálogo simples para escolher o alvo do link
+function chooseTarget(targets){
+  return new Promise((resolve)=>{
+    if(!targets || !targets.length){ resolve(null); return; }
+    const label = "Para quem é esse link?\n" + targets.map((t,i)=>`${i+1}) ${t}`).join("\n") + "\n\nDigite o número:";
+    const ans = prompt(label);
+    if(!ans) return resolve(null);
+    const idx = parseInt(ans,10)-1;
+    if(isNaN(idx) || idx<0 || idx>=targets.length) return resolve(null);
+    resolve(targets[idx]);
+  });
+}
+</script>
+</body>
+</html>
