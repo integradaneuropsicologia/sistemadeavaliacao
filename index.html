@@ -43,6 +43,30 @@
     .topbar .brand{font-weight:700}
     .hidden{display:none !important}
     @media (max-width:720px){.row,.row3{grid-template-columns:1fr}}
+    /* ===== Ajustes cards de testes ===== */
+.check{ align-items:flex-start; }                 /* alinha tudo pelo topo */
+.check input[type="checkbox"]{ margin-top:2px; }  /* checkbox alinha com o topo do texto */
+.check .box{ flex:1; min-width:0; }               /* permite quebra correta do texto */
+.check .code{
+  font-weight:700; 
+  font-size:1rem; 
+  line-height:1.35; 
+  margin-top:2px;
+  overflow-wrap:anywhere; 
+  word-break:break-word;  /* não deixa vazar */
+}
+.check .title{
+  font-weight:700; 
+  font-size:.9rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  color:var(--muted); 
+  letter-spacing:.02em;
+  overflow-wrap:anywhere; 
+  word-break:break-word;  /* quebra strings longas */
+}
+
+.tag{ flex-shrink:0; }                            /* a tag de status não espreme o texto */
+
   </style>
 </head>
 <body>
@@ -66,42 +90,56 @@
 
     <!-- APP -->
     <section id="viewApp" class="card hidden">
-      <h1>Cadastro de Paciente</h1>
-      <h2>Dados do paciente</h2>
+  <h1>Cadastro de Paciente</h1>
 
-      <div class="row3">
-        <div><label>Nome completo</label><input id="pacNome" type="text" placeholder="Ex.: Ana Paula Gomes do Nascimento" /></div>
-        <div><label>CPF (somente números)</label><input id="pacCPF" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" /></div>
-        <div><label>Data de nascimento</label><input id="pacNasc" type="date" /></div>
-      </div>
+  <!-- BLOCO 1: SOMENTE CPF (fica sempre visível após login) -->
+  <div id="cpfLookup" class="row" style="margin-top:8px;">
+    <div>
+      <label>CPF (somente números)</label>
+      <input id="pacCPF" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" />
+    </div>
+  </div>
+  <div class="toolbar" id="lookupBar">
+    <button id="btnBuscar" class="btn sec">Buscar/Carregar por CPF</button>
+    <button id="btnCopyLink" class="btn sec">Copiar link</button>
+  </div>
 
-      <div class="row">
-        <div><label>E-mail</label><input id="pacEmail" type="email" placeholder="nome@exemplo.com" autocomplete="email" /></div>
-        <div><label>WhatsApp (DDD + número)</label><input id="pacWhats" type="tel" inputmode="numeric" placeholder="(41) 9 9999-9999" /></div>
-      </div>
+  <div id="pacMsg" class="msg hidden"></div>
 
-      <div class="toolbar">
-        <button id="btnBuscar" class="btn sec">Buscar/Carregar por CPF</button>
-        <button id="btnSalvar" class="btn">Salvar</button>
-        <button id="btnCopyLink" class="btn sec">Copiar link</button>
-        <button id="btnSendEmail" class="btn sec">Enviar e-mail</button>
-      </div>
+  <!-- BLOCO 2: FORM DE DADOS (apenas quando CPF existe ou para novo cadastro) -->
+  <div id="pacForm" class="hidden">
+    <h2>Dados do paciente</h2>
+    <div class="row">
+      <div><label>Nome completo</label><input id="pacNome" type="text" placeholder="Ex.: Ana Paula Gomes do Nascimento" /></div>
+      <div><label>Data de nascimento</label><input id="pacNasc" type="date" /></div>
+    </div>
+    <div class="row">
+      <div><label>E-mail</label><input id="pacEmail" type="email" placeholder="nome@exemplo.com" autocomplete="email" /></div>
+      <div><label>WhatsApp (DDD + número)</label><input id="pacWhats" type="tel" inputmode="numeric" placeholder="(41) 9 9999-9999" /></div>
+    </div>
 
-      <div id="pacMsg" class="msg hidden"></div>
+    <div class="toolbar" id="formBar">
+      <button id="btnSalvar" class="btn">Salvar</button>
+    </div>
+  </div>
 
-      <h2 style="margin-top:18px;">Testes</h2>
-      <div class="toolbar" style="margin-bottom:6px;">
-        <label for="statusFilter" style="margin:0;align-self:center;">Filtrar por status</label>
-        <select id="statusFilter" aria-label="Filtrar por status">
-          <option value="todos">Todos</option>
-          <option value="cadastrar">Cadastrar</option>
-          <option value="ja">Já registrados</option>
-          <option value="preenchido">Preenchido</option>
-        </select>
-        <div id="testsInfo" class="tag new">carregando catálogo…</div>
-      </div>
-      <div id="testsGrid" class="grid-tests" aria-live="polite"></div>
-    </section>
+  <!-- BLOCO 3: TESTES (apenas quando CPF existe OU para liberar testes no novo cadastro) -->
+  <div id="testsWrap" class="hidden">
+    <h2 style="margin-top:18px;">Testes</h2>
+    <div class="toolbar" style="margin-bottom:6px;">
+      <label for="statusFilter" style="margin:0;align-self:center;">Filtrar por status</label>
+      <select id="statusFilter" aria-label="Filtrar por status">
+        <option value="todos">Todos</option>
+        <option value="cadastrar">Cadastrar</option>
+        <option value="ja">Já registrados</option>
+        <option value="preenchido">Preenchido</option>
+      </select>
+      <div id="testsInfo" class="tag new">carregando catálogo…</div>
+    </div>
+    <div id="testsGrid" class="grid-tests" aria-live="polite"></div>
+  </div>
+</section>
+
   </div>
 
 <script>
@@ -109,16 +147,27 @@
 const SHEETDB_BASE = "https://sheetdb.io/api/v1/8pmdh33s9fvy8";
 const SHEETS = { AUTH:"Auth", TESTS:"Tests", PATIENTS:"Patients", TOKENS:"LinkTokens" };
 const PATIENT_PORTAL_URL = "https://integradaneuropsicologia.github.io/formularios";
-const AUTO_EMAIL_ON_CREATE = true;
-const AUTO_EMAIL_ON_UPDATE = false;
-// Apps Script que envia e-mail (se falhar, cai em mailto:)
-const MAIL_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzj0UnQOnDpA1kcPucLHG6UHhYyjU_aoDRQdF3biT9d9INj3PvEcFMQOgrrPxbewyqHPQ/exec";
 
 /* ===== HELPERS ===== */
 const $ = s => document.querySelector(s);
 const el = (t,o={}) => Object.assign(document.createElement(t),o);
 function show(n){ n.classList.remove("hidden"); }
 function hide(n){ n.classList.add("hidden"); }
+function enterLookupMode(){
+  // limpa estado e mostra só o CPF + barra de busca
+  hide($("#pacForm"));
+  hide($("#testsWrap"));
+  show($("#lookupBar"));
+  setMsg($("#pacMsg"), "");
+  // limpa campos (menos o CPF)
+  $("#pacNome").value = "";
+  $("#pacNasc").value = "";
+  $("#pacEmail").value = "";
+  $("#pacWhats").value = "";
+}
+
+
+
 function setMsg(b,t,ty="ok"){ b.textContent=t; b.className="msg "+(ty||""); t?show(b):hide(b); }
 function onlyDigits(s){ return (s||"").replace(/\D+/g,""); }
 function validaCPF(cpf){
@@ -198,26 +247,6 @@ async function getOrCreatePatientLink(cpf){
   return `${PATIENT_PORTAL_URL}?token=${encodeURIComponent(tk.token)}`;
 }
 
-/* ===== E-mail (Apps Script + fallback) ===== */
-async function sendEmailAuto(to, subject, htmlBody){
-  if(!isValidEmail(to)) throw new Error("E-mail inválido.");
-  if(!MAIL_WEBAPP_URL){
-    const url = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(htmlBody.replace(/<br\s*\/?>/gi,"\n").replace(/<\/?[^>]+(>|$)/g,""))}`;
-    window.location.href = url; return "ok-mailto";
-  }
-  try{
-    const r = await fetch(MAIL_WEBAPP_URL, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ to, subject, html: htmlBody }) });
-    if(r.type==="opaque") return "ok-webapp-opaque";
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    const j = await r.json().catch(()=>({ok:false}));
-    if(j && j.ok) return "ok-webapp";
-    throw new Error("Resposta inválida do WebApp");
-  }catch(err){
-    const url = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(htmlBody.replace(/<br\s*\/?>/gi,"\n").replace(/<\/?[^>]+(>|$)/g,""))}`;
-    window.location.href = url; return "ok-mailto-fallback";
-  }
-}
-
 /* ===== Login ===== */
 async function tryAuthVariants(user, pass){
   const combos=[ {u:"login",p:"senha"}, {u:"usuario",p:"senha"}, {u:"email",p:"senha"}, {u:"Login",p:"Senha"} ];
@@ -234,6 +263,12 @@ $("#btnLogout").addEventListener("click", ()=>{
   $("#loginUser").value=""; $("#loginPass").value="";
   hide($("#viewApp")); hide($("#btnLogout")); show($("#viewLogin")); setMsg($("#loginMsg"), "");
 });
+// Enter no CPF executa a busca
+$("#pacCPF").addEventListener("keydown", e=>{
+  if(e.key==="Enter"){ carregarPorCPF(); }
+});
+
+
 async function doLogin(){
   const user=$("#loginUser").value.trim(); const pass=$("#loginPass").value; const msg=$("#loginMsg");
   if(!user||!pass){ setMsg(msg,"Preencha usuário e senha.","warn"); return; }
@@ -242,8 +277,11 @@ async function doLogin(){
     const ok = await tryAuthVariants(user, pass);
     if(!ok){ setMsg(msg,"Usuário ou senha inválidos.","err"); return; }
     setMsg(msg,"Login ok.","ok");
-    hide($("#viewLogin")); show($("#viewApp")); show($("#btnLogout"));
-    await loadTests(); $("#pacCPF").focus();
+hide($("#viewLogin")); show($("#viewApp")); show($("#btnLogout"));
+await loadTests();
+enterLookupMode();
+$("#pacCPF").focus();
+
   }catch(e){ setMsg(msg,"Erro no login: "+e.message,"err"); }
 }
 
@@ -273,11 +311,26 @@ function renderTests(){
   $("#testsInfo").className="tag"; $("#testsInfo").textContent=`Ativos: ${testsCatalog.length} • Cadastrar: ${cCadastrar} • Já: ${cJa} • Preenchido: ${cDone} • Filtro: ${lbl}`;
   for(const t of testsCatalog){
     const st=testStatus(t); if(statusFilter!=="todos" && st!==statusFilter) continue;
-    const wrap=el("label",{className:"check"}); const cb=el("input",{type:"checkbox",id:`cb_${t.code}`,disabled:(st!=="cadastrar")});
-    const box=el("div"); const title=el("div",{textContent:t.label}); const sub=el("small",{textContent:t.code});
-    let tagClass="new",tagText="cadastrar"; if(st==="ja"){tagClass="ok";tagText="já registrado";} if(st==="preenchido"){tagClass="done";tagText="preenchido";}
-    const tag=el("span",{className:"tag "+tagClass,textContent:tagText});
-    box.appendChild(title); box.appendChild(sub); wrap.appendChild(cb); wrap.appendChild(box); wrap.appendChild(tag); grid.appendChild(wrap);
+    const wrap = el("label", { className: "check" });
+const cb   = el("input", { type:"checkbox", id:`cb_${t.code}`, disabled:(st!=="cadastrar") });
+
+// box com code em cima e label abaixo
+const box      = el("div", { className:"box" });
+const codeEl   = el("div", { className:"code",  textContent: t.code });
+const labelEl  = el("div", { className:"title", textContent: t.label });
+box.appendChild(codeEl);
+box.appendChild(labelEl);
+
+let tagClass="new", tagText="cadastrar";
+if (st==="ja"){ tagClass="ok"; tagText="já registrado"; }
+if (st==="preenchido"){ tagClass="done"; tagText="preenchido"; }
+const tag = el("span", { className:"tag "+tagClass, textContent:tagText });
+
+wrap.appendChild(cb);
+wrap.appendChild(box);
+wrap.appendChild(tag);
+grid.appendChild(wrap);
+
   }
 }
 $("#statusFilter").addEventListener("change", e=>{ statusFilter=e.target.value; renderTests(); });
@@ -287,20 +340,34 @@ async function carregarPorCPF(){
   const cpf=onlyDigits($("#pacCPF").value);
   if(!cpf){ setMsg($("#pacMsg"),"Digite um CPF.","warn"); return; }
   if(!validaCPF(cpf)){ setMsg($("#pacMsg"),"CPF inválido.","err"); return; }
+
   setMsg($("#pacMsg"),"Buscando cadastro…");
   const found=await sheetSearch(SHEETS.PATIENTS,{cpf});
+
   if(found && found.length){
+    // MODO UPDATE (paciente existe)
     currentPatient=found[0]; mode="update";
-    $("#pacNome").value=currentPatient.nome||""; $("#pacNasc").value=(currentPatient.data_nascimento||"").slice(0,10);
+    $("#pacNome").value=currentPatient.nome||"";
+    $("#pacNasc").value=(currentPatient.data_nascimento||"").slice(0,10);
     $("#pacEmail").value=currentPatient.email||"";
-    const w=currentPatient.whatsapp||""; $("#pacWhats").value=w||""; if(w) formatWhatsInput($("#pacWhats"));
+    const w=currentPatient.whatsapp||"";
+    $("#pacWhats").value=w||""; if(w) formatWhatsInput($("#pacWhats"));
     setMsg($("#pacMsg"),"Cadastro encontrado.","ok");
+
+    // abre form + testes
+    show($("#pacForm"));
+    show($("#testsWrap"));
   }else{
-    currentPatient=null; mode="create"; $("#pacEmail").value=""; $("#pacWhats").value="";
-    setMsg($("#pacMsg"),"CPF sem cadastro. Você está no modo NOVO cadastro.","warn");
+    currentPatient=null; mode="create";
+    $("#pacNome").value=""; $("#pacNasc").value="";
+    $("#pacEmail").value=""; $("#pacWhats").value="";
+    setMsg($("#pacMsg"),"CPF sem cadastro. Preencha os dados e selecione os testes para cadastrar.","warn");
+    show($("#pacForm"));
+    show($("#testsWrap"));
   }
   renderTests();
 }
+
 
 async function salvar(){
   try{
@@ -320,27 +387,13 @@ async function salvar(){
       const row={ nome, cpf, data_nascimento:nascISO, created_at:nowDateTimeLocal(), email, whatsapp:whatsE164 };
       for(const t of testsCatalog){ const checked=document.querySelector(`#cb_${t.code}`)?.checked; row[t.code]=checked?"sim":"não"; }
       await sheetCreate(SHEETS.PATIENTS,row); currentPatient=row; setMsg($("#pacMsg"),"Cadastro criado com sucesso.","ok");
-      const link=await getOrCreatePatientLink(cpf);
-      if(AUTO_EMAIL_ON_CREATE && email){
-        const html=`Olá, ${nome}!<br><br>Segue seu link de acesso aos formulários:<br><a href="${link}" target="_blank">${link}</a><br><br>Qualquer dúvida, estou à disposição.<br>— Integrada Neuropsicologia`;
-        try{ await sendEmailAuto(email,"Acesso aos seus formulários",html); setMsg($("#pacMsg"),"Cadastro criado e e-mail enviado com o link. ✔️","ok"); }
-        catch(errMail){ console.error(errMail); setMsg($("#pacMsg"),"Cadastro criado. Não consegui enviar e-mail automaticamente.","warn"); }
-      }
       renderTests();
     }else{
       const update={ nome, data_nascimento:nascISO, email, whatsapp:whatsE164 }; let marcou=false;
       for(const t of testsCatalog){ const ja=!!(currentPatient && String(currentPatient[t.code]||"").toLowerCase()==="sim"); const cb=document.querySelector(`#cb_${t.code}`); if(cb && !ja && cb.checked){ update[t.code]="sim"; marcou=true; } }
       await sheetPatchBy(SHEETS.PATIENTS,"cpf",cpf,update);
       setMsg($("#pacMsg"), marcou? "Cadastro atualizado: novos testes liberados." : "Cadastro atualizado.","ok");
-      if(AUTO_EMAIL_ON_UPDATE && email){
-        try{
-          const link=await getOrCreatePatientLink(cpf);
-          const html=`Olá, ${nome}!<br><br>Atualizamos seus formulários. Acesse:<br><a href="${link}" target="_blank">${link}</a><br><br>— Integrada Neuropsicologia`;
-          await sendEmailAuto(email,"Formulários atualizados",html);
-          setMsg($("#pacMsg"),"Atualização feita e e-mail enviado com o link. ✔️","ok");
-        }catch(errMail){ console.error(errMail); setMsg($("#pacMsg"),"Atualizado. Não consegui enviar e-mail automaticamente.","warn"); }
-      }
-      await carregarPorCPF();
+    await carregarPorCPF();
     }
   }catch(e){ if(e && e.message) console.error(e.message); }
   finally{ const btn=$("#btnSalvar"); btn.disabled=false; btn.textContent="Salvar"; }
@@ -371,24 +424,6 @@ $("#btnCopyLink").addEventListener("click", async ()=>{
   }
 });
 
-// Enviar e-mail manual (reenvio)
-$("#btnSendEmail").addEventListener("click", async ()=>{
-  const cpf = onlyDigits($("#pacCPF").value);
-  const email = ($("#pacEmail").value || currentPatient?.email || "").trim();
-  const nome = $("#pacNome").value.trim() || (currentPatient?.nome || "Paciente");
-  if(!validaCPF(cpf)){ setMsg($("#pacMsg"), "CPF inválido.", "err"); return; }
-  if(!email){ setMsg($("#pacMsg"), "Informe um e-mail válido para reenviar.", "warn"); return; }
-  try{
-    setMsg($("#pacMsg"), "Preparando e-mail…");
-    const link = await getOrCreatePatientLink(cpf);
-    const html = `Olá, ${nome}!<br><br>Segue novamente seu link de acesso aos formulários:<br><a href="${link}" target="_blank">${link}</a><br><br>Qualquer dúvida, estou à disposição.<br>— Integrada Neuropsicologia`;
-    await sendEmailAuto(email, "Acesso aos seus formulários", html);
-    setMsg($("#pacMsg"), "E-mail enviado com o link. ✔️", "ok");
-  }catch(e){
-    setMsg($("#pacMsg"), "Não consegui enviar o e-mail automaticamente. Tente novamente mais tarde.", "warn");
-    console.error(e);
-  }
-});
 </script>
 </body>
 </html>
