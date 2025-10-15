@@ -411,7 +411,7 @@ $("#btnCopyLink").addEventListener("click", async ()=>{
   try{
     const nome = $("#pacNome").value.trim() || (currentPatient?.nome || "Paciente");
     const link = await getOrCreatePatientLink(cpf);
-    const texto = `Olá, ${nome}! Segue seu link de acesso aos formulários: ${link}`;
+    const texto = `Olá, tudo bem? ${nome}! Segue seu link de acesso aos formulários. OBS:. Os que tiverem a observação de copiar link, você deve clicar no botão (irá copiar o link para ser enviado para um familiar ou amigo que lhe conheça para responder com informações ao seu respeito). ${link}`;
     if(navigator.clipboard && window.isSecureContext){
       await navigator.clipboard.writeText(texto);
     }else{
@@ -427,3 +427,4 @@ $("#btnCopyLink").addEventListener("click", async ()=>{
 </script>
 </body>
 </html>
+
