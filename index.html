@@ -36,48 +36,60 @@
     .grid-tests{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:10px}
     .check{display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0b1220}
     .check small{display:block;color:var(--muted)}
-    .tag{font-size:.75rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-    .tag.ok{background:#09331b;color:#9af0b1;border-color:#124d29}
-    .tag.done{background:#07263a;color:#b9e7ff;border-color:#0a3c66}
-    .tag.new{background:#2a2a2a}
+    .tag{ font-size:.75rem; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted) }
+.tag.ok{   background:#09331b; color:#9af0b1; border-color:#124d29 }
+.tag.done{ background:#07263a; color:#b9e7ff; border-color:#0a3c66 }
+.tag.new{  background:#2a2a2a }
+
     .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
     .topbar .brand{font-weight:700}
     .hidden{display:none !important}
     @media (max-width:720px){.row,.row3{grid-template-columns:1fr}}
-    /* ===== Ajustes cards de testes ===== */
-.check{ align-items:flex-start; }                 /* alinha tudo pelo topo */
-.check input[type="checkbox"]{ margin-top:2px; }  /* checkbox alinha com o topo do texto */
-.check .box{ flex:1; min-width:0; }               /* permite quebra correta do texto */
+   
+.check{ align-items:flex-start; }                 
+.check input[type="checkbox"]{
+  width:18px; height:18px;
+  margin-top:4px;
+}
+.check .box{ flex:1; min-width:0; }              
 .check .code{
-  font-weight:700; 
-  font-size:1rem; 
-  line-height:1.35; 
-  margin-top:2px;
-  overflow-wrap:anywhere; 
-  word-break:break-word;  /* não deixa vazar */
+  font-weight:700;
+  font-size:1rem;
+  line-height:1.3;
+  overflow-wrap:anywhere;
+  word-break:break-word;
 }
 .check .title{
-  font-weight:700; 
-  font-size:.9rem;
+  font-weight:600;
+  font-size:.92rem;
   font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
-  color:var(--muted); 
+  color:var(--muted);
   letter-spacing:.02em;
-  overflow-wrap:anywhere; 
-  word-break:break-word;  /* quebra strings longas */
+  overflow-wrap:anywhere;
+  word-break:break-word;
 }
 
 .tag{ flex-shrink:0; }                            /* a tag de status não espreme o texto */
 /* === Cores por respondente === */
 :root{
-  --src-paciente:#22c55e;        /* verde */
-  --src-pais:#f59e0b;            /* âmbar */
-  --src-professores:#60a5fa;     /* azul */
-  --src-familiares:#e879f9;      /* rosa */
-  --src-desconhecido:#94a3b8;    /* cinza */
+  --src-paciente:#22c55e;
+  --src-pais:#f59e0b;
+  --src-professores:#3a92ff;
+  --src-familiares:#dd00ff;
+  --src-profissional:#ec0808; /* troque se quiser outra cor */
 }
-
 /* Base dos cards já existe (.check). Vamos só colorir por classe */
-.check{ position:relative; }
+.check{
+  position:relative;
+  display:flex;
+  flex-direction:column;      /* empilha */
+  align-items:flex-start;
+  gap:8px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#0b1220;
+}
 
 /* Badge com o nome do respondente no canto direito */
 .check::after{
@@ -88,12 +100,18 @@
   background:rgba(255,255,255,.06); color:var(--muted);
 }
 
-/* Faixa lateral + leve “glow” interno por tipo */
+
 .check.src-paciente{    border-left:6px solid var(--src-paciente);    box-shadow: inset 0 0 0 1px rgba(34,197,94,.15); }
 .check.src-pais{        border-left:6px solid var(--src-pais);        box-shadow: inset 0 0 0 1px rgba(245,158,11,.15); }
 .check.src-professores{ border-left:6px solid var(--src-professores); box-shadow: inset 0 0 0 1px rgba(96,165,250,.15); }
 .check.src-familiares{  border-left:6px solid var(--src-familiares);  box-shadow: inset 0 0 0 1px rgba(232,121,249,.15); }
-.check.src-desconhecido{border-left:6px solid var(--src-desconhecido);box-shadow: inset 0 0 0 1px rgba(148,163,184,.15); }
+.check.src-profissional{border-left:6px solid var(--src-profissional);box-shadow: inset 0 0 0 1px rgba(255,251,11,.15); }
+.check::after{ content:none !important; }
+.meta{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
 
 /* (Opcional) mini-legenda horizontal */
 .legend{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.8rem;color:var(--muted)}
@@ -103,9 +121,10 @@
 .legend .dot.pais{background:var(--src-pais)}
 .legend .dot.professores{background:var(--src-professores)}
 .legend .dot.familiares{background:var(--src-familiares)}
+.legend .dot.profissional{background:var(--src-profissional)}
 
 /* === Corrige sobreposição: desativa o ::after do respondente === */
-.check::after{ content:none !important; }
+
 
 /* Permite quebrar para duas linhas se faltar espaço */
 .check{ position:relative; flex-wrap:wrap; gap:10px; }
@@ -115,8 +134,6 @@
 
 /* Chips (respondente + status) não “apertam” o texto */
 .srcchip, .tag{ flex-shrink:0; }
-
-/* Chip do respondente (DOM real, não mais ::after) */
 .srcchip{
   display:inline-flex; align-items:center; gap:6px;
   font-size:.72rem; padding:2px 8px;
@@ -130,9 +147,8 @@
 .srcchip.pais::before{        background:var(--src-pais); }
 .srcchip.professores::before{ background:var(--src-professores); }
 .srcchip.familiares::before{  background:var(--src-familiares); }
-.srcchip.desconhecido::before{background:var(--src-desconhecido); }
+.srcchip.profissional::before{background:var(--src-profissional); }
 
-/* Bordas laterais (você já tem) continuam valendo */
 
 
   </style>
@@ -156,13 +172,7 @@
       <div id="loginMsg" class="msg hidden"></div>
     </section>
 
-<div class="legend" style="margin-top:4px;">
-  <span>Respondente:</span>
-  <span class="chip"><span class="dot paciente"></span> Paciente</span>
-  <span class="chip"><span class="dot pais"></span> Pais/Cuidadores</span>
-  <span class="chip"><span class="dot professores"></span> Professores</span>
-  <span class="chip"><span class="dot familiares"></span> Familiares/Amigos</span>
-</div>
+
 
 
     <!-- APP -->
@@ -212,9 +222,18 @@
         <option value="preenchido">Preenchido</option>
       </select>
       <div id="testsInfo" class="tag new">carregando catálogo…</div>
+      <div class="legend" style="margin-top:4px;">
+  <span>Respondente:</span>
+  <span class="chip"><span class="dot paciente"></span> Paciente</span>
+  <span class="chip"><span class="dot pais"></span> Pais/Cuidadores</span>
+  <span class="chip"><span class="dot professores"></span> Professores</span>
+  <span class="chip"><span class="dot familiares"></span> Familiares/Amigos</span>
+  <span class="chip"><span class="dot profissional"></span> Profissional</span>
+</div>
     </div>
     <div id="testsGrid" class="grid-tests" aria-live="polite"></div>
   </div>
+  
 </section>
 
   </div>
@@ -390,57 +409,73 @@ function normalizeSource(raw){
   const s = (raw||'').toString().toLowerCase()
     .normalize('NFD').replace(/\p{Diacritic}/gu,'').trim();
 
-  // Paciente
-  if(!s || s.includes('pac')) return { cls:'paciente', label:'Paciente' };
-
-  // Pais/Cuidadores
-  if(s.includes('pai') || s.includes('cuidad') || s.includes('respons')) 
-    return { cls:'pais', label:'Pais/Cuidadores' };
+  // Profissional (testar ANTES de 'prof' para não colidir com "professores")
+  if (s.includes('profissional') || s.includes('terapeut') || s.includes('psicolog') || s.includes('neuropsic'))
+    return { cls:'profissional', label:'Profissional' };
 
   // Professores
-  if(s.includes('prof')) return { cls:'professores', label:'Professores' };
+  if (s.includes('prof'))
+    return { cls:'professores', label:'Professores' };
+
+  // Pais/Cuidadores
+  if (s.includes('pai') || s.includes('cuidad') || s.includes('respons'))
+    return { cls:'pais', label:'Pais/Cuidadores' };
 
   // Familiares/Amigos
-  if(s.includes('fam') || s.includes('amig'))
+  if (s.includes('fam') || s.includes('amig'))
     return { cls:'familiares', label:'Familiares/Amigos' };
 
-  // fallback
-  return { cls:'desconhecido', label: raw || 'Desconhecido' };
+  // Paciente (fallback correto)
+  return { cls:'paciente', label:'Paciente' };
 }
 
 
 function renderTests(){
   const grid=$("#testsGrid"); grid.innerHTML="";
-  if(!testsCatalog.length){ $("#testsInfo").className="tag new"; $("#testsInfo").textContent="Nenhum teste ativo no catálogo (aba Tests)."; return; }
+  if(!testsCatalog.length){
+    $("#testsInfo").className="tag new";
+    $("#testsInfo").textContent="Nenhum teste ativo no catálogo (aba Tests).";
+    return;
+  }
   let cCadastrar=0,cJa=0,cDone=0;
+
   for(const t of testsCatalog){
-  const st = testStatus(t); 
-  if(statusFilter!=="todos" && st!==statusFilter) continue;
+    const st = testStatus(t);
+    if(statusFilter!=="todos" && st!==statusFilter) continue;
 
-  const src = normalizeSource(t.source);
-  const wrap = el("label", { className: `check src-${src.cls}` });
-  wrap.setAttribute('data-source-label', src.label);
+    const src = normalizeSource(t.source);
 
-  const cb   = el("input", { type:"checkbox", id:`cb_${t.code}`, disabled:(st!=="cadastrar") });
+    const wrap = el("label", { className: `check src-${src.cls}` });
 
-  const box      = el("div", { className:"box" });
-  const codeEl   = el("div", { className:"code",  textContent: t.code });
-  const labelEl  = el("div", { className:"title", textContent: t.label });
-  box.appendChild(codeEl);
-  box.appendChild(labelEl);
+    // 1) TÍTULO
+    const codeEl   = el("div", { className:"code",  textContent: t.code });
 
-  let tagClass="new", tagText="cadastrar";
-  if(st==="ja"){ tagClass="ok"; tagText="já registrado"; }
-  if(st==="preenchido"){ tagClass="done"; tagText="preenchido"; }
-  const tag = el("span", { className:"tag "+tagClass, textContent:tagText });
+    // 2) LABEL (subtítulo)
+    const labelEl  = el("div", { className:"title", textContent: t.label });
 
-  wrap.appendChild(cb);
-  wrap.appendChild(box);
-  wrap.appendChild(tag);
-  grid.appendChild(wrap);
+    // 3) SPANS (chip do respondente + status)
+    let tagClass="new", tagText="cadastrar";
+    if(st==="ja"){ tagClass="ok"; tagText="já registrado"; }
+    if(st==="preenchido"){ tagClass="done"; tagText="preenchido"; }
+    const tag  = el("span", { className:"tag "+tagClass, textContent: tagText });
+    const chip = el("span", { className:"srcchip "+src.cls, textContent: src.label });
+    const meta = el("div", { className:"meta" });
+    meta.appendChild(chip);
+    meta.appendChild(tag);
+
+    // 4) CHECKBOX (fica por último)
+    const cb = el("input", { type:"checkbox", id:`cb_${t.code}`, disabled:(st!=="cadastrar") });
+
+    // monta na ordem pedida
+    wrap.appendChild(codeEl);
+    wrap.appendChild(labelEl);
+    wrap.appendChild(meta);
+    wrap.appendChild(cb);
+
+    grid.appendChild(wrap);
+  }
 }
 
-}
 $("#statusFilter").addEventListener("change", e=>{ statusFilter=e.target.value; renderTests(); });
 
 /* ===== Paciente ===== */
