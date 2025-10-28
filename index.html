@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,151 +6,234 @@
   <title>Cadastro de Pacientes — Integrada Neuropsicologia</title>
   <meta name="description" content="Login e cadastro de pacientes com liberação de testes por SheetDB." />
   <style>
-    :root{
-      --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --pri:#4f46e5; --line:#1f2937;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
-    .wrap{max-width:960px;margin:32px auto;padding:0 16px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
-    h1,h2{margin:0 0 12px}
-    h1{font-size:1.4rem}
-    h2{font-size:1.05rem;color:var(--muted)}
-    label{display:block;font-weight:600;margin:10px 0 6px}
-    input,button,select{font:inherit}
-    input[type="text"],input[type="password"],input[type="date"],input[type="email"],input[type="tel"]{
-      width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#fff
-    }
-    select{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#fff}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    .btn{display:inline-flex;align-items:center;gap:10px;background:var(--pri);border:none;color:#fff;padding:12px 16px;border-radius:10px;cursor:pointer}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .btn.sec{background:#334155}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .msg{margin:10px 0;padding:10px;border-radius:8px}
-    .msg.ok{background:#052e1a;color:#b3f7c1;border:1px solid #114d2a}
-    .msg.err{background:#3b0d0d;color:#ffd0d0;border:1px solid #5b1919}
-    .msg.warn{background:#3a2903;color:#ffe6b0;border:1px solid #5c4307}
-    .grid-tests{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:10px}
-    .check{display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0b1220}
-    .check small{display:block;color:var(--muted)}
-    .tag{ font-size:.75rem; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted) }
-.tag.ok{   background:#09331b; color:#9af0b1; border-color:#124d29 }
-.tag.done{ background:#07263a; color:#b9e7ff; border-color:#0a3c66 }
-.tag.new{  background:#2a2a2a }
+  :root{
+    --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
+    --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --pri:#4f46e5; --line:#1f2937;
+  }
 
-    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-    .topbar .brand{font-weight:700}
-    .hidden{display:none !important}
-    @media (max-width:720px){.row,.row3{grid-template-columns:1fr}}
-   
-.check{ align-items:flex-start; }                 
-.check input[type="checkbox"]{
-  width:18px; height:18px;
-  margin-top:4px;
-}
-.check .box{ flex:1; min-width:0; }              
-.check .code{
-  font-weight:700;
-  font-size:1rem;
-  line-height:1.3;
-  overflow-wrap:anywhere;
-  word-break:break-word;
-}
-.check .title{
-  font-weight:600;
-  font-size:.92rem;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
-  color:var(--muted);
-  letter-spacing:.02em;
-  overflow-wrap:anywhere;
-  word-break:break-word;
-}
+  *{box-sizing:border-box}
 
-.tag{ flex-shrink:0; }                            /* a tag de status não espreme o texto */
-/* === Cores por respondente === */
-:root{
-  --src-paciente:#22c55e;
-  --src-pais:#f59e0b;
-  --src-professores:#3a92ff;
-  --src-familiares:#dd00ff;
-  --src-profissional:#ec0808; /* troque se quiser outra cor */
-}
-/* Base dos cards já existe (.check). Vamos só colorir por classe */
-.check{
-  position:relative;
-  display:flex;
-  flex-direction:column;      /* empilha */
-  align-items:flex-start;
-  gap:8px;
-  padding:12px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:#0b1220;
-}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu
+  }
 
-/* Badge com o nome do respondente no canto direito */
-.check::after{
-  content:attr(data-source-label);
-  position:absolute; top:8px; right:8px;
-  font-size:.7rem; padding:2px 8px;
-  border-radius:999px; border:1px solid var(--line);
-  background:rgba(255,255,255,.06); color:var(--muted);
-}
+  .wrap{max-width:960px;margin:32px auto;padding:0 16px}
 
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px
+  }
 
-.check.src-paciente{    border-left:6px solid var(--src-paciente);    box-shadow: inset 0 0 0 1px rgba(34,197,94,.15); }
-.check.src-pais{        border-left:6px solid var(--src-pais);        box-shadow: inset 0 0 0 1px rgba(245,158,11,.15); }
-.check.src-professores{ border-left:6px solid var(--src-professores); box-shadow: inset 0 0 0 1px rgba(96,165,250,.15); }
-.check.src-familiares{  border-left:6px solid var(--src-familiares);  box-shadow: inset 0 0 0 1px rgba(232,121,249,.15); }
-.check.src-profissional{border-left:6px solid var(--src-profissional);box-shadow: inset 0 0 0 1px rgba(255,251,11,.15); }
-.check::after{ content:none !important; }
-.meta{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
+  h1,h2{margin:0 0 12px}
+  h1{font-size:1.4rem}
+  h2{font-size:1.05rem;color:var(--muted)}
 
-/* (Opcional) mini-legenda horizontal */
-.legend{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.8rem;color:var(--muted)}
-.legend .chip{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;background:#0b1220}
-.legend .dot{width:10px;height:10px;border-radius:50%}
-.legend .dot.paciente{background:var(--src-paciente)}
-.legend .dot.pais{background:var(--src-pais)}
-.legend .dot.professores{background:var(--src-professores)}
-.legend .dot.familiares{background:var(--src-familiares)}
-.legend .dot.profissional{background:var(--src-profissional)}
+  label{display:block;font-weight:600;margin:10px 0 6px}
 
-/* === Corrige sobreposição: desativa o ::after do respondente === */
+  input,button,select{font:inherit}
 
+  input[type="text"],
+  input[type="password"],
+  input[type="date"],
+  input[type="email"],
+  input[type="tel"]{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:#0b1220;
+    color:#fff
+  }
 
-/* Permite quebrar para duas linhas se faltar espaço */
-.check{ position:relative; flex-wrap:wrap; gap:10px; }
+  select{
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:#0b1220;
+    color:#fff
+  }
 
-/* Mantém o texto ocupando o espaço principal */
-.check .box{ flex:1 1 auto; min-width:0; }
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px
+  }
 
-/* Chips (respondente + status) não “apertam” o texto */
-.srcchip, .tag{ flex-shrink:0; }
-.srcchip{
-  display:inline-flex; align-items:center; gap:6px;
-  font-size:.72rem; padding:2px 8px;
-  border:1px solid var(--line); border-radius:999px;
-  background:#0b1220; color:var(--muted);
-}
-.srcchip::before{ content:""; width:10px; height:10px; border-radius:50%; }
+  .row3{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px
+  }
 
-/* Cores do pontinho do chip por tipo */
-.srcchip.paciente::before{    background:var(--src-paciente); }
-.srcchip.pais::before{        background:var(--src-pais); }
-.srcchip.professores::before{ background:var(--src-professores); }
-.srcchip.familiares::before{  background:var(--src-familiares); }
-.srcchip.profissional::before{background:var(--src-profissional); }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--pri);
+    border:none;
+    color:#fff;
+    padding:12px 16px;
+    border-radius:10px;
+    cursor:pointer
+  }
 
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .btn.sec{background:#334155}
 
+  .toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px
+  }
 
-  </style>
+  .msg{
+    margin:10px 0;
+    padding:10px;
+    border-radius:8px
+  }
+
+  .msg.ok{
+    background:#052e1a;
+    color:#b3f7c1;
+    border:1px solid #114d2a
+  }
+
+  .msg.err{
+    background:#3b0d0d;
+    color:#ffd0d0;
+    border:1px solid #5b1919
+  }
+
+  .msg.warn{
+    background:#3a2903;
+    color:#ffe6b0;
+    border:1px solid #5c4307
+  }
+
+  .grid-tests{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:10px;
+    margin-top:10px
+  }
+
+  /* card de cada teste */
+  .check{
+    display:flex;
+    flex-wrap:wrap;             /* ⭐ IMPORTANTE: permite quebrar linha */
+    align-items:flex-start;
+    gap:10px;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#0b1220;
+    max-width:100%;
+  }
+
+  .check small{display:block;color:var(--muted)}
+
+  .box{
+    flex:1;
+    min-width:0;                /* deixa texto quebrar e não estourar */
+  }
+
+  .check input[type="checkbox"]{
+    margin-top:2px;
+    flex-shrink:0;
+  }
+
+  .check .code{
+    font-weight:700;
+    font-size:1rem;
+    line-height:1.35;
+    margin-top:2px;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+
+  .check .title{
+    font-weight:700;
+    font-size:.9rem;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+    color:var(--muted);
+    letter-spacing:.02em;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+
+  .tag{
+    flex-shrink:0;              /* a tag não empurra o texto */
+    font-size:.75rem;
+    padding:2px 8px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    color:var(--muted)
+  }
+
+  .tag.ok{
+    background:#09331b;
+    color:#9af0b1;
+    border-color:#124d29
+  }
+
+  .tag.done{
+    background:#07263a;
+    color:#b9e7ff;
+    border-color:#0a3c66
+  }
+
+  .tag.new{background:#2a2a2a}
+
+  /* bloco "remover formulário" */
+  .rmbox{
+    flex-basis:100%;            /* ⭐ vira segunda linha, largura total */
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+    font-size:.8rem;
+    margin-top:8px;
+    color:var(--err);
+    background:#3b0d0d;
+    border:1px solid #5b1919;
+    border-radius:8px;
+    padding:6px 8px;
+    line-height:1.3;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+
+  .rmchk{
+    margin-top:2px;
+    flex-shrink:0;
+  }
+
+  .rmnote{
+    font-weight:600;
+    color:#ffd0d0;
+  }
+
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px
+  }
+
+  .topbar .brand{font-weight:700}
+
+  .hidden{display:none !important}
+
+  @media (max-width:720px){
+    .row,.row3{grid-template-columns:1fr}
+  }
+</style>
+
 </head>
 <body>
   <div class="wrap">
@@ -171,9 +253,6 @@
       <div class="toolbar"><button id="btnLogin" class="btn">Entrar</button></div>
       <div id="loginMsg" class="msg hidden"></div>
     </section>
-
-
-
 
     <!-- APP -->
     <section id="viewApp" class="card hidden">
@@ -222,18 +301,9 @@
         <option value="preenchido">Preenchido</option>
       </select>
       <div id="testsInfo" class="tag new">carregando catálogo…</div>
-      <div class="legend" style="margin-top:4px;">
-  <span>Respondente:</span>
-  <span class="chip"><span class="dot paciente"></span> Paciente</span>
-  <span class="chip"><span class="dot pais"></span> Pais/Cuidadores</span>
-  <span class="chip"><span class="dot professores"></span> Professores</span>
-  <span class="chip"><span class="dot familiares"></span> Familiares/Amigos</span>
-  <span class="chip"><span class="dot profissional"></span> Profissional</span>
-</div>
     </div>
     <div id="testsGrid" class="grid-tests" aria-live="polite"></div>
   </div>
-  
 </section>
 
   </div>
@@ -388,89 +458,123 @@ let testsCatalog=[]; let currentPatient=null; let mode="create"; let statusFilte
 async function loadTests(){
   $("#testsInfo").textContent="carregando catálogo…";
   const rows = await sheetSearch(SHEETS.TESTS,{active:"sim"});
-  testsCatalog = rows.map(r=>({
-      code:  r.code?.trim(),
-      label: r.label?.trim(),
-      order: Number(r.order||9999),
-      source: (r.source||'paciente').trim()
-    }))
-    .filter(r=>r.code&&r.label)
-    .sort((a,b)=>a.order-b.order);
+  testsCatalog = rows.map(r=>({code:r.code?.trim(),label:r.label?.trim(),order:Number(r.order||9999)}))
+                     .filter(r=>r.code&&r.label).sort((a,b)=>a.order-b.order);
   renderTests();
 }
-
 function testStatus(t){
   const code=t.code, done=code+"_FEITO";
   const ja = !!(currentPatient && String(currentPatient[code]||"").toLowerCase()==="sim");
   const feito = !!(currentPatient && String(currentPatient[done]||"").toLowerCase()==="sim");
   if(ja && feito) return "preenchido"; if(ja) return "ja"; return "cadastrar";
 }
-function normalizeSource(raw){
-  const s = (raw||'').toString().toLowerCase()
-    .normalize('NFD').replace(/\p{Diacritic}/gu,'').trim();
-
-  // Profissional (testar ANTES de 'prof' para não colidir com "professores")
-  if (s.includes('profissional') || s.includes('terapeut') || s.includes('psicolog') || s.includes('neuropsic'))
-    return { cls:'profissional', label:'Profissional' };
-
-  // Professores
-  if (s.includes('prof'))
-    return { cls:'professores', label:'Professores' };
-
-  // Pais/Cuidadores
-  if (s.includes('pai') || s.includes('cuidad') || s.includes('respons'))
-    return { cls:'pais', label:'Pais/Cuidadores' };
-
-  // Familiares/Amigos
-  if (s.includes('fam') || s.includes('amig'))
-    return { cls:'familiares', label:'Familiares/Amigos' };
-
-  // Paciente (fallback correto)
-  return { cls:'paciente', label:'Paciente' };
-}
-
-
 function renderTests(){
-  const grid=$("#testsGrid"); grid.innerHTML="";
+  const grid = $("#testsGrid");
+  grid.innerHTML = "";
+
   if(!testsCatalog.length){
     $("#testsInfo").className="tag new";
     $("#testsInfo").textContent="Nenhum teste ativo no catálogo (aba Tests).";
     return;
   }
-  let cCadastrar=0,cJa=0,cDone=0;
 
+  // contadores pro resumo
+  let cCadastrar=0, cJa=0, cDone=0;
+  for(const t of testsCatalog){
+    const st = testStatus(t);
+    if(st==="cadastrar") cCadastrar++;
+    else if(st==="ja") cJa++;
+    else cDone++;
+  }
+
+  const lbl = {
+    todos:"Todos",
+    cadastrar:"Cadastrar",
+    ja:"Já registrados",
+    preenchido:"Preenchido"
+  }[statusFilter];
+
+  $("#testsInfo").className="tag";
+  $("#testsInfo").textContent =
+    `Ativos: ${testsCatalog.length} • Cadastrar: ${cCadastrar} • Já: ${cJa} • Preenchido: ${cDone} • Filtro: ${lbl}`;
+
+  // montar cards
   for(const t of testsCatalog){
     const st = testStatus(t);
     if(statusFilter!=="todos" && st!==statusFilter) continue;
 
-    const src = normalizeSource(t.source);
+    // card externo
+    const wrap = el("div", { className: "check" });
 
-    const wrap = el("label", { className: `check src-${src.cls}` });
+    // coluna esquerda (cadastrar checkbox OU vazio)
+    let leftBox = null;
 
-    // 1) TÍTULO
-    const codeEl   = el("div", { className:"code",  textContent: t.code });
+    if(st === "cadastrar"){
+      // checkbox pra LIBERAR esse teste
+      leftBox = el("input", {
+        type:"checkbox",
+        id:`cb_${t.code}`,
+        disabled:false
+      });
+    } else {
+      // se não é "cadastrar", não coloco esse checkbox na esquerda
+      leftBox = el("div", { style:"width:16px;flex-shrink:0;" });
+    }
 
-    // 2) LABEL (subtítulo)
-    const labelEl  = el("div", { className:"title", textContent: t.label });
+    // meio: informações do teste
+    const box = el("div", { className:"box" });
+    const codeEl  = el("div", { className:"code",  textContent: t.code });
+    const labelEl = el("div", { className:"title", textContent: t.label });
+    box.appendChild(codeEl);
+    box.appendChild(labelEl);
 
-    // 3) SPANS (chip do respondente + status)
+    // tag de status à direita
     let tagClass="new", tagText="cadastrar";
     if(st==="ja"){ tagClass="ok"; tagText="já registrado"; }
     if(st==="preenchido"){ tagClass="done"; tagText="preenchido"; }
-    const tag  = el("span", { className:"tag "+tagClass, textContent: tagText });
-    const chip = el("span", { className:"srcchip "+src.cls, textContent: src.label });
-    const meta = el("div", { className:"meta" });
-    meta.appendChild(chip);
-    meta.appendChild(tag);
+    const tag = el("span", {
+      className:"tag "+tagClass,
+      textContent: tagText
+    });
 
-    // 4) CHECKBOX (fica por último)
-    const cb = el("input", { type:"checkbox", id:`cb_${t.code}`, disabled:(st!=="cadastrar") });
+    // junto os 3 pedaços principais
+    wrap.appendChild(leftBox);
+    wrap.appendChild(box);
+    wrap.appendChild(tag);
 
-    // monta na ordem pedida
-    wrap.appendChild(codeEl);
-    wrap.appendChild(labelEl);
-    wrap.appendChild(meta);
-    wrap.appendChild(cb);
+    // agora: SE já estava liberado mas AINDA NÃO preenchido → botão de DESCADASTRAR
+    // regra: só status "ja" pode ser removido
+    if(st === "ja"){
+      const rmWrap = el("label", { className:"rmbox" });
+
+      const rmChk = el("input", {
+        type:"checkbox",
+        id:`rm_${t.code}`,
+        className:"rmchk"
+      });
+
+      const rmTxt = el("div", {});
+      const strongLine = el("div", {
+        className:"rmnote",
+        textContent:"Remover"
+      });
+      const smallLine = el("div", {
+        textContent:""
+      });
+
+      rmTxt.appendChild(strongLine);
+      rmTxt.appendChild(smallLine);
+
+      rmWrap.appendChild(rmChk);
+      rmWrap.appendChild(rmTxt);
+
+      // adiciona abaixo do card
+      wrap.appendChild(el("div", {style:"flex-basis:100%"})); // quebra linha
+      wrap.appendChild(rmWrap);
+    }
+
+    // se "preenchido", não deixo remover por padrão
+    // (se quiser permitir remover mesmo preenchido, pode copiar o bloco acima e trocar a condição)
 
     grid.appendChild(wrap);
   }
@@ -514,33 +618,142 @@ async function carregarPorCPF(){
 
 async function salvar(){
   try{
-    const btn=$("#btnSalvar"); btn.disabled=true; btn.textContent="Salvando…";
-    const nome=$("#pacNome").value.trim(); const cpf=onlyDigits($("#pacCPF").value); const nascISO=toISODateFromInput($("#pacNasc").value);
-    const email=$("#pacEmail").value.trim(); const whatsRaw=$("#pacWhats").value; const whatsE164=normalizeWhats(whatsRaw);
-    if(!nome){ setMsg($("#pacMsg"),"Informe o nome.","warn"); throw new Error(); }
-    if(!validaCPF(cpf)){ setMsg($("#pacMsg"),"CPF inválido.","err"); throw new Error(); }
-    if(!nascISO){ setMsg($("#pacMsg"),"Informe a data de nascimento.","warn"); throw new Error(); }
-    if(email && !isValidEmail(email)){ setMsg($("#pacMsg"),"E-mail inválido.","warn"); throw new Error(); }
-    if(whatsRaw && !whatsE164){ setMsg($("#pacMsg"),"WhatsApp inválido. Use DDD + número.","warn"); throw new Error(); }
+    const btn = $("#btnSalvar");
+    btn.disabled = true;
+    btn.textContent = "Salvando…";
 
-    let exists=null; try{ const f=await sheetSearch(SHEETS.PATIENTS,{cpf}); if(f && f.length){ exists=f[0]; } }catch(_){}
-    if(mode==="create" && exists){ currentPatient=exists; mode="update"; }
+    const nome   = $("#pacNome").value.trim();
+    const cpf    = onlyDigits($("#pacCPF").value);
+    const nascISO= toISODateFromInput($("#pacNasc").value);
+    const email  = $("#pacEmail").value.trim();
+    const whatsRaw = $("#pacWhats").value;
+    const whatsE164 = normalizeWhats(whatsRaw);
 
-    if(mode==="create"){
-      const row={ nome, cpf, data_nascimento:nascISO, created_at:nowDateTimeLocal(), email, whatsapp:whatsE164 };
-      for(const t of testsCatalog){ const checked=document.querySelector(`#cb_${t.code}`)?.checked; row[t.code]=checked?"sim":"não"; }
-      await sheetCreate(SHEETS.PATIENTS,row); currentPatient=row; setMsg($("#pacMsg"),"Cadastro criado com sucesso.","ok");
-      renderTests();
-    }else{
-      const update={ nome, data_nascimento:nascISO, email, whatsapp:whatsE164 }; let marcou=false;
-      for(const t of testsCatalog){ const ja=!!(currentPatient && String(currentPatient[t.code]||"").toLowerCase()==="sim"); const cb=document.querySelector(`#cb_${t.code}`); if(cb && !ja && cb.checked){ update[t.code]="sim"; marcou=true; } }
-      await sheetPatchBy(SHEETS.PATIENTS,"cpf",cpf,update);
-      setMsg($("#pacMsg"), marcou? "Cadastro atualizado: novos testes liberados." : "Cadastro atualizado.","ok");
-    await carregarPorCPF();
+    // validações básicas
+    if(!nome){
+      setMsg($("#pacMsg"),"Informe o nome.","warn");
+      throw new Error();
     }
-  }catch(e){ if(e && e.message) console.error(e.message); }
-  finally{ const btn=$("#btnSalvar"); btn.disabled=false; btn.textContent="Salvar"; }
+    if(!validaCPF(cpf)){
+      setMsg($("#pacMsg"),"CPF inválido.","err");
+      throw new Error();
+    }
+    if(!nascISO){
+      setMsg($("#pacMsg"),"Informe a data de nascimento.","warn");
+      throw new Error();
+    }
+    if(email && !isValidEmail(email)){
+      setMsg($("#pacMsg"),"E-mail inválido.","warn");
+      throw new Error();
+    }
+    if(whatsRaw && !whatsE164){
+      setMsg($("#pacMsg"),"WhatsApp inválido. Use DDD + número.","warn");
+      throw new Error();
+    }
+
+    // garantir que a gente sabe se é create/update
+    let exists=null;
+    try{
+      const f=await sheetSearch(SHEETS.PATIENTS,{cpf});
+      if(f && f.length){ exists=f[0]; }
+    }catch(_){}
+
+    if(mode==="create" && exists){
+      currentPatient = exists;
+      mode = "update";
+    }
+
+    if(mode === "create"){
+      // montar linha nova inteira
+      const row = {
+        nome,
+        cpf,
+        data_nascimento: nascISO,
+        created_at: nowDateTimeLocal(),
+        email,
+        whatsapp: whatsE164
+      };
+
+      // para cada teste do catálogo:
+      // se marcado pra cadastrar => "sim", senão "não"
+      for(const t of testsCatalog){
+        const cb = document.querySelector(`#cb_${t.code}`);
+        row[t.code] = cb && cb.checked ? "sim" : "não";
+      }
+
+      await sheetCreate(SHEETS.PATIENTS, row);
+      currentPatient = row;
+      setMsg($("#pacMsg"),"Cadastro criado com sucesso.","ok");
+      renderTests();
+
+    } else {
+      // UPDATE
+      const update = {
+        nome,
+        data_nascimento: nascISO,
+        email,
+        whatsapp: whatsE164
+      };
+
+      let mudouAlgumaCoisa = false;
+
+      // 1. LIBERAR novos testes (de "cadastrar")
+      for(const t of testsCatalog){
+        const jaTem = !!(currentPatient && String(currentPatient[t.code]||"").toLowerCase()==="sim");
+        const cbAdd = document.querySelector(`#cb_${t.code}`);
+        if(cbAdd && !jaTem && cbAdd.checked){
+          update[t.code] = "sim";
+          mudouAlgumaCoisa = true;
+        }
+      }
+
+      // 2. REMOVER testes já liberados ("ja")
+      // regra: só se status atual é "ja", e o checkbox de remover foi marcado
+      for(const t of testsCatalog){
+        const st = testStatus(t); // usa o currentPatient atual
+        if(st === "ja"){
+          const cbRm = document.querySelector(`#rm_${t.code}`);
+          if(cbRm && cbRm.checked){
+            // descadastrar = voltar pra "não"
+            update[t.code] = "não";
+
+            // se você quiser também limpar o _FEITO:
+            // (isso impede de ficar marcado como já preenchido por acidente no futuro)
+            // MAS cuidado: se algum dia você marcar _FEITO manualmente sem realmente ter resposta,
+            // isso pode apagar esse rastro.
+            update[ t.code + "_FEITO" ] = "";
+
+            mudouAlgumaCoisa = true;
+          }
+        }
+      }
+
+      // manda PATCH só se tem algo diferente
+      await sheetPatchBy(SHEETS.PATIENTS, "cpf", cpf, update);
+
+      setMsg(
+        $("#pacMsg"),
+        mudouAlgumaCoisa
+          ? "Cadastro atualizado (alterações de testes aplicadas)."
+          : "Cadastro atualizado.",
+        "ok"
+      );
+
+      // recarrega paciente pra refletir estado novo
+      await carregarPorCPF();
+    }
+
+  }catch(e){
+    if(e && e.message){
+      console.error(e.message);
+    }
+  }finally{
+    const btn = $("#btnSalvar");
+    btn.disabled = false;
+    btn.textContent = "Salvar";
+  }
 }
+
 
 /* ===== Ações ===== */
 $("#btnBuscar").addEventListener("click", carregarPorCPF);
@@ -570,4 +783,3 @@ $("#btnCopyLink").addEventListener("click", async ()=>{
 </script>
 </body>
 </html>
-
