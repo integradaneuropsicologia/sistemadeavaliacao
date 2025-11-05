@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -9,7 +10,74 @@
   :root{
     --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
     --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --pri:#4f46e5; --line:#1f2937;
+     --src-paciente:#7c3aed;       /* violeta */
+  --src-familiares:#22c55e;     /* verde  */
+  --src-pais:#f59e0b;           /* âmbar  */
+  --src-professores:#60a5fa;    /* azul   */
+  --src-outros:#94a3b8;         /* neutro */
   }
+
+  :root{
+  /* já tinha as cores hex */
+  --src-paciente:#7c3aed;
+  --src-familiares:#22c55e;
+  --src-pais:#f59e0b;
+  --src-professores:#60a5fa;
+  --src-outros:#94a3b8;
+
+  /* RGB das mesmas cores (pra usar com alpha) */
+  --src-paciente-rgb:124,58,237;
+  --src-familiares-rgb:34,197,94;
+  --src-pais-rgb:245,158,11;
+  --src-professores-rgb:96,165,250;
+  --src-outros-rgb:148,163,184;
+
+  /* intensidade do “tint” (0.10–0.22 geralmente fica ótimo) */
+  --tint-alpha:.16;
+}
+/* base do card (já existe): */
+.check{ background:#0b1220; border-left:6px solid var(--line); }
+
+/* PACIENTE */
+.check.source-paciente{
+  border-left-color:var(--src-paciente);
+  background:
+    linear-gradient(0deg, rgba(var(--src-paciente-rgb),var(--tint-alpha)), rgba(var(--src-paciente-rgb),var(--tint-alpha))),
+    #0b1220;
+}
+
+/* FAMILIARES/AMIGOS */
+.check.source-familiares{
+  border-left-color:var(--src-familiares);
+  background:
+    linear-gradient(0deg, rgba(var(--src-familiares-rgb),var(--tint-alpha)), rgba(var(--src-familiares-rgb),var(--tint-alpha))),
+    #0b1220;
+}
+
+/* PAIS/CUIDADORES */
+.check.source-pais{
+  border-left-color:var(--src-pais);
+  background:
+    linear-gradient(0deg, rgba(var(--src-pais-rgb),var(--tint-alpha)), rgba(var(--src-pais-rgb),var(--tint-alpha))),
+    #0b1220;
+}
+
+/* PROFESSORES */
+.check.source-professores{
+  border-left-color:var(--src-professores);
+  background:
+    linear-gradient(0deg, rgba(var(--src-professores-rgb),var(--tint-alpha)), rgba(var(--src-professores-rgb),var(--tint-alpha))),
+    #0b1220;
+}
+
+/* OUTROS (fallback) */
+.check.source-outros{
+  border-left-color:var(--src-outros);
+  background:
+    linear-gradient(0deg, rgba(var(--src-outros-rgb),var(--tint-alpha)), rgba(var(--src-outros-rgb),var(--tint-alpha))),
+    #0b1220;
+}
+
 
   *{box-sizing:border-box}
 
@@ -134,14 +202,19 @@
     border-radius:10px;
     background:#0b1220;
     max-width:100%;
+      border-left:6px solid var(--line);
   }
 
-  .check small{display:block;color:var(--muted)}
+  .check{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
 
   .box{
-    flex:1;
-    min-width:0;                /* deixa texto quebrar e não estourar */
-  }
+  flex: 1 1 260px;   /* cresce, encolhe, base 260px */
+  min-width: 220px;  /* não deixa colapsar ao ponto de quebrar letra por letra */
+}
 
   .check input[type="checkbox"]{
     margin-top:2px;
@@ -149,23 +222,50 @@
   }
 
   .check .code{
-    font-weight:700;
-    font-size:1rem;
-    line-height:1.35;
-    margin-top:2px;
-    overflow-wrap:anywhere;
-    word-break:break-word;
-  }
+  margin:0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-weight:700;
+  font-size:.95rem;
+  line-height:1.2;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  color:var(--text);
+  overflow-wrap:anywhere;  /* ok para códigos longos */
+  word-break:normal;
+}
+ .check.source-paciente{     border-left-color:var(--src-paciente); }
+.check.source-familiares{   border-left-color:var(--src-familiares); }
+.check.source-pais{         border-left-color:var(--src-pais); }
+.check.source-professores{  border-left-color:var(--src-professores); }
+.check.source-outros{       border-left-color:var(--src-outros); }
 
   .check .title{
-    font-weight:700;
-    font-size:.9rem;
-    font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
-    color:var(--muted);
-    letter-spacing:.02em;
-    overflow-wrap:anywhere;
-    word-break:break-word;
-  }
+  margin:2px 0 0 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu;
+  font-weight:600;
+  font-size:.9rem;
+  line-height:1.35;
+  color:var(--muted);
+  overflow-wrap: break-word;  /* só quebra quando precisa */
+  word-break: normal;
+  hyphens: auto;
+}
+
+  .source-chip{
+  flex-shrink:0;
+  font-size:.75rem;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  color:var(--muted);
+   flex: 0 0 auto;
+}
+
+.source-chip.paciente{     border-color:var(--src-paciente);     color:var(--src-paciente); }
+.source-chip.familiares{   border-color:var(--src-familiares);   color:var(--src-familiares); }
+.source-chip.pais{         border-color:var(--src-pais);         color:var(--src-pais); }
+.source-chip.professores{  border-color:var(--src-professores);  color:var(--src-professores); }
+.source-chip.outros{       border-color:var(--src-outros);       color:var(--src-outros); }
 
   .tag{
     flex-shrink:0;              /* a tag não empurra o texto */
@@ -174,6 +274,7 @@
     border-radius:999px;
     border:1px solid var(--line);
     color:var(--muted)
+     
   }
 
   .tag.ok{
@@ -232,6 +333,11 @@
   @media (max-width:720px){
     .row,.row3{grid-template-columns:1fr}
   }
+
+  @media (max-width: 480px){
+  .check .code{ font-size: .92rem; }
+  .check .title{ font-size: .86rem; }
+}
 </style>
 
 </head>
@@ -454,20 +560,51 @@ $("#pacCPF").focus();
 /* ===== Estado ===== */
 let testsCatalog=[]; let currentPatient=null; let mode="create"; let statusFilter="todos";
 
+
+/* ===== SOURCE (origem do respondente) ===== */
+function normalizeSourceLabel(raw){
+  const s = (raw||"").trim();
+  return s || "Outros";
+}
+function normalizeSourceKey(raw){
+  let s = (raw||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+  if(!s) return "outros";
+  if(s.startsWith("paciente")) return "paciente";
+  if(s.includes("famil"))     return "familiares";     // familiares/amigos
+  if(s.includes("pais") || s.includes("cuidad")) return "pais"; // pais/cuidadores
+  if(s.includes("prof"))      return "professores";
+  return "outros";
+}
+
+
 /* ===== Catálogo de testes ===== */
 async function loadTests(){
   $("#testsInfo").textContent="carregando catálogo…";
   const rows = await sheetSearch(SHEETS.TESTS,{active:"sim"});
-  testsCatalog = rows.map(r=>({code:r.code?.trim(),label:r.label?.trim(),order:Number(r.order||9999)}))
-                     .filter(r=>r.code&&r.label).sort((a,b)=>a.order-b.order);
+
+  testsCatalog = (rows||[])
+    .map(r=>{
+      const code = r.code?.trim();
+      const label = r.label?.trim();
+      const order = Number(r.order||9999);
+      const srcLabel = normalizeSourceLabel(r.source);
+      const srcKey   = normalizeSourceKey(r.source);
+      return { code, label, order, srcLabel, srcKey };
+    })
+    .filter(r=>r.code && r.label)
+    .sort((a,b)=>a.order-b.order);
+
   renderTests();
 }
+
 function testStatus(t){
   const code=t.code, done=code+"_FEITO";
   const ja = !!(currentPatient && String(currentPatient[code]||"").toLowerCase()==="sim");
   const feito = !!(currentPatient && String(currentPatient[done]||"").toLowerCase()==="sim");
   if(ja && feito) return "preenchido"; if(ja) return "ja"; return "cadastrar";
 }
+
+
 function renderTests(){
   const grid = $("#testsGrid");
   grid.innerHTML = "";
@@ -505,6 +642,7 @@ function renderTests(){
 
     // card externo
     const wrap = el("div", { className: "check" });
+    wrap.classList.add(`source-${t.srcKey}`);
 
     // coluna esquerda (cadastrar checkbox OU vazio)
     let leftBox = null;
@@ -536,11 +674,16 @@ function renderTests(){
       className:"tag "+tagClass,
       textContent: tagText
     });
+const srcChip = el("span", {
+  className: `source-chip ${t.srcKey}`,
+  textContent: t.srcLabel
+});
 
     // junto os 3 pedaços principais
     wrap.appendChild(leftBox);
     wrap.appendChild(box);
     wrap.appendChild(tag);
+    wrap.appendChild(srcChip);
 
     // agora: SE já estava liberado mas AINDA NÃO preenchido → botão de DESCADASTRAR
     // regra: só status "ja" pode ser removido
