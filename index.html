@@ -14,7 +14,8 @@
   --src-familiares:#22c55e;     /* verde  */
   --src-pais:#f59e0b;           /* âmbar  */
   --src-professores:#60a5fa;    /* azul   */
-  --src-outros:#94a3b8;         /* neutro */
+  --src-outros:#94a3b8;     
+  --src-profissional:#14b8a6;
   }
 
   :root{
@@ -24,6 +25,7 @@
   --src-pais:#f59e0b;
   --src-professores:#60a5fa;
   --src-outros:#94a3b8;
+  --src-profissional:#14b8a6;
 
   /* RGB das mesmas cores (pra usar com alpha) */
   --src-paciente-rgb:124,58,237;
@@ -31,6 +33,7 @@
   --src-pais-rgb:245,158,11;
   --src-professores-rgb:96,165,250;
   --src-outros-rgb:148,163,184;
+  --src-profissional-rgb:20,184,166;
 
   /* intensidade do “tint” (0.10–0.22 geralmente fica ótimo) */
   --tint-alpha:.16;
@@ -77,6 +80,19 @@
     linear-gradient(0deg, rgba(var(--src-outros-rgb),var(--tint-alpha)), rgba(var(--src-outros-rgb),var(--tint-alpha))),
     #0b1220;
 }
+
+/* PROFISSIONAL */
+.check.source-profissional{
+  border-left-color: var(--src-profissional);
+  background:
+    linear-gradient(0deg,
+      rgba(var(--src-profissional-rgb), var(--tint-alpha)),
+      rgba(var(--src-profissional-rgb), var(--tint-alpha))
+    ),
+    #0b1220;
+}
+.check.source-profissional{ border-left-color: var(--src-profissional); }
+
 
 
   *{box-sizing:border-box}
@@ -266,6 +282,11 @@
 .source-chip.pais{         border-color:var(--src-pais);         color:var(--src-pais); }
 .source-chip.professores{  border-color:var(--src-professores);  color:var(--src-professores); }
 .source-chip.outros{       border-color:var(--src-outros);       color:var(--src-outros); }
+.source-chip.profissional{
+  border-color: var(--src-profissional);
+  color: var(--src-profissional);
+}
+
 
   .tag{
     flex-shrink:0;              /* a tag não empurra o texto */
@@ -572,6 +593,7 @@ function normalizeSourceKey(raw){
   if(s.startsWith("paciente")) return "paciente";
   if(s.includes("famil"))     return "familiares";     // familiares/amigos
   if(s.includes("pais") || s.includes("cuidad")) return "pais"; // pais/cuidadores
+  if(s.includes("profis"))    return "profissional"; 
   if(s.includes("prof"))      return "professores";
   return "outros";
 }
