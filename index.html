@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,945 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cadastro de Pacientes — Integrada Neuropsicologia</title>
   <meta name="description" content="Login e cadastro de pacientes com liberação de testes por SheetDB." />
-  <style>
-  :root{
-    --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
-    --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --pri:#4f46e5; --line:#1f2937;
-     --src-paciente:#7c3aed;       /* violeta */
-  --src-familiares:#22c55e;     /* verde  */
-  --src-pais:#f59e0b;           /* âmbar  */
-  --src-professores:#60a5fa;    /* azul   */
-  --src-outros:#94a3b8;     
-  --src-profissional:#14b8a6;
-  }
-
-  :root{
-  /* já tinha as cores hex */
-  --src-paciente:#7c3aed;
-  --src-familiares:#22c55e;
-  --src-pais:#f59e0b;
-  --src-professores:#60a5fa;
-  --src-outros:#94a3b8;
-  --src-profissional:#14b8a6;
-
-  /* RGB das mesmas cores (pra usar com alpha) */
-  --src-paciente-rgb:124,58,237;
-  --src-familiares-rgb:34,197,94;
-  --src-pais-rgb:245,158,11;
-  --src-professores-rgb:96,165,250;
-  --src-outros-rgb:148,163,184;
-  --src-profissional-rgb:20,184,166;
-
-  /* intensidade do “tint” (0.10–0.22 geralmente fica ótimo) */
-  --tint-alpha:.16;
-}
-/* base do card (já existe): */
-.check{ background:#0b1220; border-left:6px solid var(--line); }
-
-/* PACIENTE */
-.check.source-paciente{
-  border-left-color:var(--src-paciente);
-  background:
-    linear-gradient(0deg, rgba(var(--src-paciente-rgb),var(--tint-alpha)), rgba(var(--src-paciente-rgb),var(--tint-alpha))),
-    #0b1220;
-}
-
-/* FAMILIARES/AMIGOS */
-.check.source-familiares{
-  border-left-color:var(--src-familiares);
-  background:
-    linear-gradient(0deg, rgba(var(--src-familiares-rgb),var(--tint-alpha)), rgba(var(--src-familiares-rgb),var(--tint-alpha))),
-    #0b1220;
-}
-
-/* PAIS/CUIDADORES */
-.check.source-pais{
-  border-left-color:var(--src-pais);
-  background:
-    linear-gradient(0deg, rgba(var(--src-pais-rgb),var(--tint-alpha)), rgba(var(--src-pais-rgb),var(--tint-alpha))),
-    #0b1220;
-}
-
-/* PROFESSORES */
-.check.source-professores{
-  border-left-color:var(--src-professores);
-  background:
-    linear-gradient(0deg, rgba(var(--src-professores-rgb),var(--tint-alpha)), rgba(var(--src-professores-rgb),var(--tint-alpha))),
-    #0b1220;
-}
-
-/* OUTROS (fallback) */
-.check.source-outros{
-  border-left-color:var(--src-outros);
-  background:
-    linear-gradient(0deg, rgba(var(--src-outros-rgb),var(--tint-alpha)), rgba(var(--src-outros-rgb),var(--tint-alpha))),
-    #0b1220;
-}
-
-/* PROFISSIONAL */
-.check.source-profissional{
-  border-left-color: var(--src-profissional);
-  background:
-    linear-gradient(0deg,
-      rgba(var(--src-profissional-rgb), var(--tint-alpha)),
-      rgba(var(--src-profissional-rgb), var(--tint-alpha))
-    ),
-    #0b1220;
-}
-.check.source-profissional{ border-left-color: var(--src-profissional); }
-
-
-
-  *{box-sizing:border-box}
-
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu
-  }
-
-  .wrap{max-width:960px;margin:32px auto;padding:0 16px}
-
-  .card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:20px
-  }
-
-  h1,h2{margin:0 0 12px}
-  h1{font-size:1.4rem}
-  h2{font-size:1.05rem;color:var(--muted)}
-
-  label{display:block;font-weight:600;margin:10px 0 6px}
-
-  input,button,select{font:inherit}
-
-  input[type="text"],
-  input[type="password"],
-  input[type="date"],
-  input[type="email"],
-  input[type="tel"]{
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid var(--line);
-    background:#0b1220;
-    color:#fff
-  }
-
-  select{
-    padding:10px 12px;
-    border-radius:10px;
-    border:1px solid var(--line);
-    background:#0b1220;
-    color:#fff
-  }
-
-  .row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px
-  }
-
-  .row3{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    gap:12px
-  }
-
-  .btn{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    background:var(--pri);
-    border:none;
-    color:#fff;
-    padding:12px 16px;
-    border-radius:10px;
-    cursor:pointer
-  }
-
-  .btn:disabled{opacity:.6;cursor:not-allowed}
-  .btn.sec{background:#334155}
-
-  .toolbar{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:10px
-  }
-
-  .msg{
-    margin:10px 0;
-    padding:10px;
-    border-radius:8px
-  }
-
-  .msg.ok{
-    background:#052e1a;
-    color:#b3f7c1;
-    border:1px solid #114d2a
-  }
-
-  .msg.err{
-    background:#3b0d0d;
-    color:#ffd0d0;
-    border:1px solid #5b1919
-  }
-
-  .msg.warn{
-    background:#3a2903;
-    color:#ffe6b0;
-    border:1px solid #5c4307
-  }
-
-  .grid-tests{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:10px;
-    margin-top:10px
-  }
-
-  /* card de cada teste */
-  .check{
-    display:flex;
-    flex-wrap:wrap;             /* ⭐ IMPORTANTE: permite quebrar linha */
-    align-items:flex-start;
-    gap:10px;
-    padding:10px;
-    border:1px solid var(--line);
-    border-radius:10px;
-    background:#0b1220;
-    max-width:100%;
-      border-left:6px solid var(--line);
-  }
-
-  .check{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:flex-start;
-}
-
-  .box{
-  flex: 1 1 260px;   /* cresce, encolhe, base 260px */
-  min-width: 220px;  /* não deixa colapsar ao ponto de quebrar letra por letra */
-}
-
-  .check input[type="checkbox"]{
-    margin-top:2px;
-    flex-shrink:0;
-  }
-
-  .check .code{
-  margin:0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-weight:700;
-  font-size:.95rem;
-  line-height:1.2;
-  letter-spacing:.02em;
-  text-transform:uppercase;
-  color:var(--text);
-  overflow-wrap:anywhere;  /* ok para códigos longos */
-  word-break:normal;
-}
- .check.source-paciente{     border-left-color:var(--src-paciente); }
-.check.source-familiares{   border-left-color:var(--src-familiares); }
-.check.source-pais{         border-left-color:var(--src-pais); }
-.check.source-professores{  border-left-color:var(--src-professores); }
-.check.source-outros{       border-left-color:var(--src-outros); }
-
-  .check .title{
-  margin:2px 0 0 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu;
-  font-weight:600;
-  font-size:.9rem;
-  line-height:1.35;
-  color:var(--muted);
-  overflow-wrap: break-word;  /* só quebra quando precisa */
-  word-break: normal;
-  hyphens: auto;
-}
-
-  .source-chip{
-  flex-shrink:0;
-  font-size:.75rem;
-  padding:2px 8px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  color:var(--muted);
-   flex: 0 0 auto;
-}
-
-.source-chip.paciente{     border-color:var(--src-paciente);     color:var(--src-paciente); }
-.source-chip.familiares{   border-color:var(--src-familiares);   color:var(--src-familiares); }
-.source-chip.pais{         border-color:var(--src-pais);         color:var(--src-pais); }
-.source-chip.professores{  border-color:var(--src-professores);  color:var(--src-professores); }
-.source-chip.outros{       border-color:var(--src-outros);       color:var(--src-outros); }
-.source-chip.profissional{
-  border-color: var(--src-profissional);
-  color: var(--src-profissional);
-}
-
-
-  .tag{
-    flex-shrink:0;              /* a tag não empurra o texto */
-    font-size:.75rem;
-    padding:2px 8px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    color:var(--muted)
-     
-  }
-
-  .tag.ok{
-    background:#09331b;
-    color:#9af0b1;
-    border-color:#124d29
-  }
-
-  .tag.done{
-    background:#07263a;
-    color:#b9e7ff;
-    border-color:#0a3c66
-  }
-
-  .tag.new{background:#2a2a2a}
-
-  /* bloco "remover formulário" */
-  .rmbox{
-    flex-basis:100%;            /* ⭐ vira segunda linha, largura total */
-    display:flex;
-    align-items:flex-start;
-    gap:6px;
-    font-size:.8rem;
-    margin-top:8px;
-    color:var(--err);
-    background:#3b0d0d;
-    border:1px solid #5b1919;
-    border-radius:8px;
-    padding:6px 8px;
-    line-height:1.3;
-    max-width:100%;
-    box-sizing:border-box;
-  }
-
-  .rmchk{
-    margin-top:2px;
-    flex-shrink:0;
-  }
-
-  .rmnote{
-    font-weight:600;
-    color:#ffd0d0;
-  }
-
-  .topbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:16px
-  }
-
-  .topbar .brand{font-weight:700}
-
-  .hidden{display:none !important}
-
-  @media (max-width:720px){
-    .row,.row3{grid-template-columns:1fr}
-  }
-
-  @media (max-width: 480px){
-  .check .code{ font-size: .92rem; }
-  .check .title{ font-size: .86rem; }
-}
-</style>
-
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body data-theme="dark">
   <div class="wrap">
     <div class="topbar">
       <div class="brand">Integrada Neuropsicologia — Painel</div>
-      <div><button id="btnLogout" class="btn sec hidden">Sair</button></div>
+      <div class="top-actions">
+        <button id="themeToggle" class="btn sec">🌙 Modo escuro</button>
+        <button id="btnLogout" class="btn sec hidden">Sair</button>
+      </div>
     </div>
 
     <!-- LOGIN -->
     <section id="viewLogin" class="card">
       <h1>Entrar</h1>
-      <p class="muted">Use seu usuário e senha cadastrados na aba <strong>Auth</strong>.</p>
+      <p class="muted">
+        Use seu usuário e senha cadastrados na aba <strong>Auth</strong>.
+      </p>
       <div class="row">
-        <div><label>Usuário</label><input id="loginUser" type="text" autocomplete="username" /></div>
-        <div><label>Senha</label><input id="loginPass" type="password" autocomplete="current-password" /></div>
+        <div>
+          <label>Usuário</label>
+          <input id="loginUser" type="text" autocomplete="username" />
+        </div>
+        <div>
+          <label>Senha</label>
+          <input id="loginPass" type="password" autocomplete="current-password" />
+        </div>
       </div>
-      <div class="toolbar"><button id="btnLogin" class="btn">Entrar</button></div>
+      <div class="toolbar">
+        <button id="btnLogin" class="btn">Entrar</button>
+      </div>
       <div id="loginMsg" class="msg hidden"></div>
     </section>
 
     <!-- APP -->
     <section id="viewApp" class="card hidden">
-  <h1>Cadastro de Paciente</h1>
+      <h1>Cadastro de Paciente</h1>
 
-  <!-- BLOCO 1: SOMENTE CPF (fica sempre visível após login) -->
-  <div id="cpfLookup" class="row" style="margin-top:8px;">
-    <div>
-      <label>CPF (somente números)</label>
-      <input id="pacCPF" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" />
-    </div>
+      <!-- BLOCO 1: SOMENTE CPF -->
+      <div id="cpfLookup" class="row" style="margin-top:8px;">
+        <div>
+          <label>CPF (somente números)</label>
+          <input id="pacCPF" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" />
+        </div>
+      </div>
+      <div class="toolbar" id="lookupBar">
+        <button id="btnBuscar" class="btn sec">Buscar/Carregar por CPF</button>
+        <button id="btnCopyLink" class="btn sec">Copiar link</button>
+      </div>
+
+      <div id="pacMsg" class="msg hidden"></div>
+
+      <!-- BLOCO 2: FORM DE DADOS -->
+      <div id="pacForm" class="hidden">
+        <h2>Dados do paciente</h2>
+        <div class="row">
+          <div>
+            <label>Nome completo</label>
+            <input id="pacNome" type="text" placeholder="Ex.: Ana Paula Gomes do Nascimento" />
+          </div>
+          <div>
+            <label>Data de nascimento</label>
+            <input id="pacNasc" type="date" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>E-mail</label>
+            <input id="pacEmail" type="email" placeholder="nome@exemplo.com" autocomplete="email" />
+          </div>
+          <div>
+            <label>WhatsApp (DDD + número)</label>
+            <input id="pacWhats" type="tel" inputmode="numeric" placeholder="(41) 9 9999-9999" />
+          </div>
+        </div>
+
+        <div class="toolbar" id="formBar">
+          <button id="btnSalvar" class="btn">Salvar</button>
+          <button id="btnBaixarAnamnese" class="btn sec">Baixar PDF da Anamnese</button>
+        </div>
+      </div>
+
+      <!-- BLOCO 3: TESTES -->
+      <div id="testsWrap" class="hidden">
+        <h2 style="margin-top:18px;">Testes</h2>
+        <div class="toolbar" style="margin-bottom:6px;">
+          <label for="statusFilter" style="margin:0;align-self:center;">Filtrar por status</label>
+          <select id="statusFilter" aria-label="Filtrar por status">
+            <option value="todos">Todos</option>
+            <option value="cadastrar">Cadastrar</option>
+            <option value="ja">Já registrados</option>
+            <option value="preenchido">Preenchido</option>
+          </select>
+          <div id="testsInfo" class="tag new">carregando catálogo…</div>
+        </div>
+        <div id="testsGrid" class="grid-tests" aria-live="polite"></div>
+      </div>
+    </section>
   </div>
-  <div class="toolbar" id="lookupBar">
-    <button id="btnBuscar" class="btn sec">Buscar/Carregar por CPF</button>
-    <button id="btnCopyLink" class="btn sec">Copiar link</button>
-  </div>
 
-  <div id="pacMsg" class="msg hidden"></div>
-
-  <!-- BLOCO 2: FORM DE DADOS (apenas quando CPF existe ou para novo cadastro) -->
-  <div id="pacForm" class="hidden">
-    <h2>Dados do paciente</h2>
-    <div class="row">
-      <div><label>Nome completo</label><input id="pacNome" type="text" placeholder="Ex.: Ana Paula Gomes do Nascimento" /></div>
-      <div><label>Data de nascimento</label><input id="pacNasc" type="date" /></div>
-    </div>
-    <div class="row">
-      <div><label>E-mail</label><input id="pacEmail" type="email" placeholder="nome@exemplo.com" autocomplete="email" /></div>
-      <div><label>WhatsApp (DDD + número)</label><input id="pacWhats" type="tel" inputmode="numeric" placeholder="(41) 9 9999-9999" /></div>
-    </div>
-
-    <div class="toolbar" id="formBar">
-      <button id="btnSalvar" class="btn">Salvar</button>
-    </div>
-  </div>
-
-  <!-- BLOCO 3: TESTES (apenas quando CPF existe OU para liberar testes no novo cadastro) -->
-  <div id="testsWrap" class="hidden">
-    <h2 style="margin-top:18px;">Testes</h2>
-    <div class="toolbar" style="margin-bottom:6px;">
-      <label for="statusFilter" style="margin:0;align-self:center;">Filtrar por status</label>
-      <select id="statusFilter" aria-label="Filtrar por status">
-        <option value="todos">Todos</option>
-        <option value="cadastrar">Cadastrar</option>
-        <option value="ja">Já registrados</option>
-        <option value="preenchido">Preenchido</option>
-      </select>
-      <div id="testsInfo" class="tag new">carregando catálogo…</div>
-    </div>
-    <div id="testsGrid" class="grid-tests" aria-live="polite"></div>
-  </div>
-</section>
-
-  </div>
-
-<script>
-/* ===== CONFIG ===== */
-const SHEETDB_BASE = "https://sheetdb.io/api/v1/8pmdh33s9fvy8";
-const SHEETS = { AUTH:"Auth", TESTS:"Tests", PATIENTS:"Patients", TOKENS:"LinkTokens" };
-const PATIENT_PORTAL_URL = "https://integradaneuropsicologia.github.io/formularios";
-
-/* ===== HELPERS ===== */
-const $ = s => document.querySelector(s);
-const el = (t,o={}) => Object.assign(document.createElement(t),o);
-function show(n){ n.classList.remove("hidden"); }
-function hide(n){ n.classList.add("hidden"); }
-function enterLookupMode(){
-  // limpa estado e mostra só o CPF + barra de busca
-  hide($("#pacForm"));
-  hide($("#testsWrap"));
-  show($("#lookupBar"));
-  setMsg($("#pacMsg"), "");
-  // limpa campos (menos o CPF)
-  $("#pacNome").value = "";
-  $("#pacNasc").value = "";
-  $("#pacEmail").value = "";
-  $("#pacWhats").value = "";
-}
-
-
-
-function setMsg(b,t,ty="ok"){ b.textContent=t; b.className="msg "+(ty||""); t?show(b):hide(b); }
-function onlyDigits(s){ return (s||"").replace(/\D+/g,""); }
-function validaCPF(cpf){
-  cpf = onlyDigits(cpf);
-  if (!cpf || cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-  let soma=0, resto;
-  for(let i=1;i<=9;i++) soma += parseInt(cpf.substring(i-1,i))*(11-i);
-  resto=(soma*10)%11; if(resto===10||resto===11) resto=0;
-  if(resto !== parseInt(cpf.substring(9,10))) return false;
-  soma=0; for(let i=1;i<=10;i++) soma += parseInt(cpf.substring(i-1,i))*(12-i);
-  resto=(soma*10)%11; if(resto===10||resto===11) resto=0;
-  return resto === parseInt(cpf.substring(10,11));
-}
-function toISODateFromInput(s){ return s || ""; }
-function nowDateTimeLocal(){ const d=new Date(),p=n=>(n<10?'0':'')+n; return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
-function isValidEmail(s){ return !!(s && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.trim())); }
-function normalizeWhats(input){
-  if(!input) return "";
-  let d = onlyDigits(input);
-  if(!d) return "";
-  if(d.startsWith("55") && d.length>=12 && d.length<=13) return "+"+d;
-  if(d.length===10 || d.length===11) return "+55"+d;
-  if(d.length>=12 && d.length<=13) return "+"+d;
-  return "";
-}
-function formatWhatsInput(el){
-  let d = onlyDigits(el.value).slice(0,13);
-  if(d.startsWith("55")) d = d.slice(2);
-  if(d.length<=2){ el.value=d; return; }
-  const ddd=d.slice(0,2); let rest=d.slice(2);
-  if(rest.length>=9) el.value = `(${ddd}) ${rest[0]} ${rest.slice(1,5)}-${rest.slice(5,9)}`;
-  else if(rest.length>=5) el.value = `(${ddd}) ${rest.slice(0,4)}-${rest.slice(4,8)}`;
-  else el.value = `(${ddd}) ${rest}`;
-}
-$("#pacWhats").addEventListener("input", ()=> formatWhatsInput($("#pacWhats")));
-
-/* ===== SheetDB ===== */
-async function sheetSearch(sheet, params){
-  const usp = new URLSearchParams(params);
-  const url = `${SHEETDB_BASE}/search?sheet=${encodeURIComponent(sheet)}&${usp.toString()}`;
-  const r = await fetch(url); if(!r.ok) throw new Error("Falha ao buscar em "+sheet); return r.json();
-}
-async function sheetCreate(sheet, row){
-  const url = `${SHEETDB_BASE}?sheet=${encodeURIComponent(sheet)}`;
-  const r = await fetch(url,{ method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ data:[row] }) });
-  if(!r.ok){ const t=await r.text(); throw new Error("Falha ao criar: "+t); } return r.json();
-}
-async function sheetPatchBy(sheet, column, value, data){
-  const url = `${SHEETDB_BASE}/${encodeURIComponent(column)}/${encodeURIComponent(value)}?sheet=${encodeURIComponent(sheet)}`;
-  const r = await fetch(url,{ method:"PATCH", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ data }) });
-  if(!r.ok){ const t=await r.text(); throw new Error("Falha ao atualizar: "+t); } return r.json();
-}
-
-/* ===== Tokens/Link ===== */
-function randomToken(len=22){ const a="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; let s=""; for(let i=0;i<len;i++) s+=a[Math.floor(Math.random()*a.length)]; return s; }
-function toISODate(d=new Date()){ return d.toISOString(); }
-function plusDays(days){ const d=new Date(); d.setDate(d.getDate()+days); return d.toISOString(); }
-async function getActiveTokenForCPF(cpf){
-  try{
-    const rows = await sheetSearch(SHEETS.TOKENS, { cpf });
-    const now = new Date();
-    const valid = (rows||[]).filter(r=>{
-      const notDisabled = String(r.disabled||"não").toLowerCase()!=="sim";
-      const okDate = !r.expires_at || new Date(r.expires_at) > now;
-      return notDisabled && okDate;
-    });
-    return valid[0] || null;
-  }catch(e){ return null; }
-}
-async function getOrCreatePatientLink(cpf){
-  let tk = await getActiveTokenForCPF(cpf);
-  if(!tk){
-    const token = randomToken();
-    const row = { token, cpf, created_at: toISODate(), expires_at: plusDays(30), disabled:"não", uses:"0", last_access_at:"" };
-    await sheetCreate(SHEETS.TOKENS, row); tk = row;
-  }
-  return `${PATIENT_PORTAL_URL}?token=${encodeURIComponent(tk.token)}`;
-}
-
-/* ===== Login ===== */
-async function tryAuthVariants(user, pass){
-  const combos=[ {u:"login",p:"senha"}, {u:"usuario",p:"senha"}, {u:"email",p:"senha"}, {u:"Login",p:"Senha"} ];
-  for(const c of combos){ try{ const rows=await sheetSearch(SHEETS.AUTH,{[c.u]:user,[c.p]:pass}); if(rows&&rows.length) return true; }catch(_){} }
-  return false;
-}
-$("#btnLogin").addEventListener("click", doLogin);
-["loginUser","loginPass"].forEach(id=>{
-  const i=document.getElementById(id);
-  i&&i.addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
-});
-$("#btnLogout").addEventListener("click", ()=>{
-  currentPatient=null; mode="create";
-  $("#loginUser").value=""; $("#loginPass").value="";
-  hide($("#viewApp")); hide($("#btnLogout")); show($("#viewLogin")); setMsg($("#loginMsg"), "");
-});
-// Enter no CPF executa a busca
-$("#pacCPF").addEventListener("keydown", e=>{
-  if(e.key==="Enter"){ carregarPorCPF(); }
-});
-
-
-async function doLogin(){
-  const user=$("#loginUser").value.trim(); const pass=$("#loginPass").value; const msg=$("#loginMsg");
-  if(!user||!pass){ setMsg(msg,"Preencha usuário e senha.","warn"); return; }
-  setMsg(msg,"Verificando…");
-  try{
-    const ok = await tryAuthVariants(user, pass);
-    if(!ok){ setMsg(msg,"Usuário ou senha inválidos.","err"); return; }
-    setMsg(msg,"Login ok.","ok");
-hide($("#viewLogin")); show($("#viewApp")); show($("#btnLogout"));
-await loadTests();
-enterLookupMode();
-$("#pacCPF").focus();
-
-  }catch(e){ setMsg(msg,"Erro no login: "+e.message,"err"); }
-}
-
-/* ===== Estado ===== */
-let testsCatalog=[]; let currentPatient=null; let mode="create"; let statusFilter="todos";
-
-
-/* ===== SOURCE (origem do respondente) ===== */
-function normalizeSourceLabel(raw){
-  const s = (raw||"").trim();
-  return s || "Outros";
-}
-function normalizeSourceKey(raw){
-  let s = (raw||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
-  if(!s) return "outros";
-  if(s.startsWith("paciente")) return "paciente";
-  if(s.includes("famil"))     return "familiares";     // familiares/amigos
-  if(s.includes("pais") || s.includes("cuidad")) return "pais"; // pais/cuidadores
-  if(s.includes("profis"))    return "profissional"; 
-  if(s.includes("prof"))      return "professores";
-  return "outros";
-}
-
-
-/* ===== Catálogo de testes ===== */
-async function loadTests(){
-  $("#testsInfo").textContent="carregando catálogo…";
-  const rows = await sheetSearch(SHEETS.TESTS,{active:"sim"});
-
-  testsCatalog = (rows||[])
-    .map(r=>{
-      const code = r.code?.trim();
-      const label = r.label?.trim();
-      const order = Number(r.order||9999);
-      const srcLabel = normalizeSourceLabel(r.source);
-      const srcKey   = normalizeSourceKey(r.source);
-      return { code, label, order, srcLabel, srcKey };
-    })
-    .filter(r=>r.code && r.label)
-    .sort((a,b)=>a.order-b.order);
-
-  renderTests();
-}
-
-function testStatus(t){
-  const code=t.code, done=code+"_FEITO";
-  const ja = !!(currentPatient && String(currentPatient[code]||"").toLowerCase()==="sim");
-  const feito = !!(currentPatient && String(currentPatient[done]||"").toLowerCase()==="sim");
-  if(ja && feito) return "preenchido"; if(ja) return "ja"; return "cadastrar";
-}
-
-
-function renderTests(){
-  const grid = $("#testsGrid");
-  grid.innerHTML = "";
-
-  if(!testsCatalog.length){
-    $("#testsInfo").className="tag new";
-    $("#testsInfo").textContent="Nenhum teste ativo no catálogo (aba Tests).";
-    return;
-  }
-
-  // contadores pro resumo
-  let cCadastrar=0, cJa=0, cDone=0;
-  for(const t of testsCatalog){
-    const st = testStatus(t);
-    if(st==="cadastrar") cCadastrar++;
-    else if(st==="ja") cJa++;
-    else cDone++;
-  }
-
-  const lbl = {
-    todos:"Todos",
-    cadastrar:"Cadastrar",
-    ja:"Já registrados",
-    preenchido:"Preenchido"
-  }[statusFilter];
-
-  $("#testsInfo").className="tag";
-  $("#testsInfo").textContent =
-    `Ativos: ${testsCatalog.length} • Cadastrar: ${cCadastrar} • Já: ${cJa} • Preenchido: ${cDone} • Filtro: ${lbl}`;
-
-  // montar cards
-  for(const t of testsCatalog){
-    const st = testStatus(t);
-    if(statusFilter!=="todos" && st!==statusFilter) continue;
-
-    // card externo
-    const wrap = el("div", { className: "check" });
-    wrap.classList.add(`source-${t.srcKey}`);
-
-    // coluna esquerda (cadastrar checkbox OU vazio)
-    let leftBox = null;
-
-    if(st === "cadastrar"){
-      // checkbox pra LIBERAR esse teste
-      leftBox = el("input", {
-        type:"checkbox",
-        id:`cb_${t.code}`,
-        disabled:false
-      });
-    } else {
-      // se não é "cadastrar", não coloco esse checkbox na esquerda
-      leftBox = el("div", { style:"width:16px;flex-shrink:0;" });
-    }
-
-    // meio: informações do teste
-    const box = el("div", { className:"box" });
-    const codeEl  = el("div", { className:"code",  textContent: t.code });
-    const labelEl = el("div", { className:"title", textContent: t.label });
-    box.appendChild(codeEl);
-    box.appendChild(labelEl);
-
-    // tag de status à direita
-    let tagClass="new", tagText="cadastrar";
-    if(st==="ja"){ tagClass="ok"; tagText="já registrado"; }
-    if(st==="preenchido"){ tagClass="done"; tagText="preenchido"; }
-    const tag = el("span", {
-      className:"tag "+tagClass,
-      textContent: tagText
-    });
-const srcChip = el("span", {
-  className: `source-chip ${t.srcKey}`,
-  textContent: t.srcLabel
-});
-
-    // junto os 3 pedaços principais
-    wrap.appendChild(leftBox);
-    wrap.appendChild(box);
-    wrap.appendChild(tag);
-    wrap.appendChild(srcChip);
-
-    // agora: SE já estava liberado mas AINDA NÃO preenchido → botão de DESCADASTRAR
-    // regra: só status "ja" pode ser removido
-    if(st === "ja"){
-      const rmWrap = el("label", { className:"rmbox" });
-
-      const rmChk = el("input", {
-        type:"checkbox",
-        id:`rm_${t.code}`,
-        className:"rmchk"
-      });
-
-      const rmTxt = el("div", {});
-      const strongLine = el("div", {
-        className:"rmnote",
-        textContent:"Remover"
-      });
-      const smallLine = el("div", {
-        textContent:""
-      });
-
-      rmTxt.appendChild(strongLine);
-      rmTxt.appendChild(smallLine);
-
-      rmWrap.appendChild(rmChk);
-      rmWrap.appendChild(rmTxt);
-
-      // adiciona abaixo do card
-      wrap.appendChild(el("div", {style:"flex-basis:100%"})); // quebra linha
-      wrap.appendChild(rmWrap);
-    }
-
-    // se "preenchido", não deixo remover por padrão
-    // (se quiser permitir remover mesmo preenchido, pode copiar o bloco acima e trocar a condição)
-
-    grid.appendChild(wrap);
-  }
-}
-
-$("#statusFilter").addEventListener("change", e=>{ statusFilter=e.target.value; renderTests(); });
-
-/* ===== Paciente ===== */
-async function carregarPorCPF(){
-  const cpf=onlyDigits($("#pacCPF").value);
-  if(!cpf){ setMsg($("#pacMsg"),"Digite um CPF.","warn"); return; }
-  if(!validaCPF(cpf)){ setMsg($("#pacMsg"),"CPF inválido.","err"); return; }
-
-  setMsg($("#pacMsg"),"Buscando cadastro…");
-  const found=await sheetSearch(SHEETS.PATIENTS,{cpf});
-
-  if(found && found.length){
-    // MODO UPDATE (paciente existe)
-    currentPatient=found[0]; mode="update";
-    $("#pacNome").value=currentPatient.nome||"";
-    $("#pacNasc").value=(currentPatient.data_nascimento||"").slice(0,10);
-    $("#pacEmail").value=currentPatient.email||"";
-    const w=currentPatient.whatsapp||"";
-    $("#pacWhats").value=w||""; if(w) formatWhatsInput($("#pacWhats"));
-    setMsg($("#pacMsg"),"Cadastro encontrado.","ok");
-
-    // abre form + testes
-    show($("#pacForm"));
-    show($("#testsWrap"));
-  }else{
-    currentPatient=null; mode="create";
-    $("#pacNome").value=""; $("#pacNasc").value="";
-    $("#pacEmail").value=""; $("#pacWhats").value="";
-    setMsg($("#pacMsg"),"CPF sem cadastro. Preencha os dados e selecione os testes para cadastrar.","warn");
-    show($("#pacForm"));
-    show($("#testsWrap"));
-  }
-  renderTests();
-}
-
-
-async function salvar(){
-  try{
-    const btn = $("#btnSalvar");
-    btn.disabled = true;
-    btn.textContent = "Salvando…";
-
-    const nome   = $("#pacNome").value.trim();
-    const cpf    = onlyDigits($("#pacCPF").value);
-    const nascISO= toISODateFromInput($("#pacNasc").value);
-    const email  = $("#pacEmail").value.trim();
-    const whatsRaw = $("#pacWhats").value;
-    const whatsE164 = normalizeWhats(whatsRaw);
-
-    // validações básicas
-    if(!nome){
-      setMsg($("#pacMsg"),"Informe o nome.","warn");
-      throw new Error();
-    }
-    if(!validaCPF(cpf)){
-      setMsg($("#pacMsg"),"CPF inválido.","err");
-      throw new Error();
-    }
-    if(!nascISO){
-      setMsg($("#pacMsg"),"Informe a data de nascimento.","warn");
-      throw new Error();
-    }
-    if(email && !isValidEmail(email)){
-      setMsg($("#pacMsg"),"E-mail inválido.","warn");
-      throw new Error();
-    }
-    if(whatsRaw && !whatsE164){
-      setMsg($("#pacMsg"),"WhatsApp inválido. Use DDD + número.","warn");
-      throw new Error();
-    }
-
-    // garantir que a gente sabe se é create/update
-    let exists=null;
-    try{
-      const f=await sheetSearch(SHEETS.PATIENTS,{cpf});
-      if(f && f.length){ exists=f[0]; }
-    }catch(_){}
-
-    if(mode==="create" && exists){
-      currentPatient = exists;
-      mode = "update";
-    }
-
-    if(mode === "create"){
-      // montar linha nova inteira
-      const row = {
-        nome,
-        cpf,
-        data_nascimento: nascISO,
-        created_at: nowDateTimeLocal(),
-        email,
-        whatsapp: whatsE164
-      };
-
-      // para cada teste do catálogo:
-      // se marcado pra cadastrar => "sim", senão "não"
-      for(const t of testsCatalog){
-        const cb = document.querySelector(`#cb_${t.code}`);
-        row[t.code] = cb && cb.checked ? "sim" : "não";
-      }
-
-      await sheetCreate(SHEETS.PATIENTS, row);
-      currentPatient = row;
-      setMsg($("#pacMsg"),"Cadastro criado com sucesso.","ok");
-      renderTests();
-
-    } else {
-      // UPDATE
-      const update = {
-        nome,
-        data_nascimento: nascISO,
-        email,
-        whatsapp: whatsE164
-      };
-
-      let mudouAlgumaCoisa = false;
-
-      // 1. LIBERAR novos testes (de "cadastrar")
-      for(const t of testsCatalog){
-        const jaTem = !!(currentPatient && String(currentPatient[t.code]||"").toLowerCase()==="sim");
-        const cbAdd = document.querySelector(`#cb_${t.code}`);
-        if(cbAdd && !jaTem && cbAdd.checked){
-          update[t.code] = "sim";
-          mudouAlgumaCoisa = true;
-        }
-      }
-
-      // 2. REMOVER testes já liberados ("ja")
-      // regra: só se status atual é "ja", e o checkbox de remover foi marcado
-      for(const t of testsCatalog){
-        const st = testStatus(t); // usa o currentPatient atual
-        if(st === "ja"){
-          const cbRm = document.querySelector(`#rm_${t.code}`);
-          if(cbRm && cbRm.checked){
-            // descadastrar = voltar pra "não"
-            update[t.code] = "não";
-
-            // se você quiser também limpar o _FEITO:
-            // (isso impede de ficar marcado como já preenchido por acidente no futuro)
-            // MAS cuidado: se algum dia você marcar _FEITO manualmente sem realmente ter resposta,
-            // isso pode apagar esse rastro.
-            update[ t.code + "_FEITO" ] = "";
-
-            mudouAlgumaCoisa = true;
-          }
-        }
-      }
-
-      // manda PATCH só se tem algo diferente
-      await sheetPatchBy(SHEETS.PATIENTS, "cpf", cpf, update);
-
-      setMsg(
-        $("#pacMsg"),
-        mudouAlgumaCoisa
-          ? "Cadastro atualizado (alterações de testes aplicadas)."
-          : "Cadastro atualizado.",
-        "ok"
-      );
-
-      // recarrega paciente pra refletir estado novo
-      await carregarPorCPF();
-    }
-
-  }catch(e){
-    if(e && e.message){
-      console.error(e.message);
-    }
-  }finally{
-    const btn = $("#btnSalvar");
-    btn.disabled = false;
-    btn.textContent = "Salvar";
-  }
-}
-
-
-/* ===== Ações ===== */
-$("#btnBuscar").addEventListener("click", carregarPorCPF);
-$("#btnSalvar").addEventListener("click", salvar);
-$("#pacCPF").addEventListener("blur", ()=>{ const d=onlyDigits($("#pacCPF").value); if(d.length===11 && validaCPF(d)) carregarPorCPF(); });
-
-// Copiar link p/ WhatsApp manual
-$("#btnCopyLink").addEventListener("click", async ()=>{
-  const cpf = onlyDigits($("#pacCPF").value);
-  if(!validaCPF(cpf)){ setMsg($("#pacMsg"), "CPF inválido.", "err"); return; }
-  try{
-    const nome = $("#pacNome").value.trim() || (currentPatient?.nome || "Paciente");
-    const link = await getOrCreatePatientLink(cpf);
-    const texto = `Olá, tudo bem? ${nome}! Segue seu link de acesso aos formulários. OBS:. Os que tiverem a observação de copiar link, você deve clicar no botão (irá copiar o link para ser enviado para um familiar ou amigo que lhe conheça para responder com informações ao seu respeito). ${link}`;
-    if(navigator.clipboard && window.isSecureContext){
-      await navigator.clipboard.writeText(texto);
-    }else{
-      const ta = document.createElement("textarea");
-      ta.value = texto; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
-    }
-    setMsg($("#pacMsg"), "Link copiado! Cole no WhatsApp do paciente. ✔️", "ok");
-  }catch(e){
-    setMsg($("#pacMsg"), "Erro ao gerar/copiar link: "+e.message, "err");
-  }
-});
-
-</script>
+  <script src="app.js"></script>
 </body>
 </html>
