@@ -9,7 +9,7 @@ const SHEETS = {
   TOKENS: "LinkTokens"
 };
 const PATIENT_PORTAL_URL = "https://integradaneuropsicologia.github.io/formularios";
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQZeGPULqpJcLXxxyOP2NC6rd73E46Q8Xoexbu1JD8SOhNc9JxXvidUuaYwWxsn07Bfg/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx17nVkMsjI3tMnguzhgIllklJRmrTmWpbRpxT3Pu7pXg5eh5yq-c-R8x8ufvnBh56yug/exec";
 
 /* ===== HELPERS DOM ===== */
 const $ = (s) => document.querySelector(s);
